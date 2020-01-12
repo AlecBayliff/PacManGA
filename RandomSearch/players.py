@@ -3,7 +3,7 @@ import numpy as np
 import copy
 class PacMan:
     def __init__(self,world):
-        self.world_map = copy.copy(world)
+        self.world = copy.copy(world)
         self._symbol = 'm'
         self._xpos = 0
         self._ypos = 0
@@ -15,57 +15,58 @@ class PacMan:
             roll = np.random.randint(4)
         if roll == 0:
             self._xpos += 1
-            if self.world_map.world_map[self._xpos][self._ypos] == 'p':
+            if self.world.world_map[self._xpos][self._ypos] == 'p':
                 self._score += 1
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
-            elif self.world_map.world_map[self._xpos][self._ypos] == 'f':
+                self.world.world_map[self._xpos][self._ypos] = ' '
+            elif self.world.world_map[self._xpos][self._ypos] == 'f':
                 self._score += 10
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
+                self.world.world_map[self._xpos][self._ypos] = ' '
+                self.world.fruit_placed = False
         elif roll == 1:
             self._ypos += 1
-            if self.world_map.world_map[self._xpos][self._ypos] == 'p':
+            if self.world.world_map[self._xpos][self._ypos] == 'p':
                 self._score += 1
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
-            elif self.world_map.world_map[self._xpos][self._ypos] == 'f':
+                self.world.world_map[self._xpos][self._ypos] = ' '
+            elif self.world.world_map[self._xpos][self._ypos] == 'f':
                 self._score += 10
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
+                self.world.world_map[self._xpos][self._ypos] = ' '
         elif roll == 2:
             self._xpos -= 1
-            if self.world_map.world_map[self._xpos][self._ypos] == 'p':
+            if self.world.world_map[self._xpos][self._ypos] == 'p':
                 self._score += 1
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
-            elif self.world_map.world_map[self._xpos][self._ypos] == 'f':
+                self.world.world_map[self._xpos][self._ypos] = ' '
+            elif self.world.world_map[self._xpos][self._ypos] == 'f':
                 self._score += 10
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
+                self.world.world_map[self._xpos][self._ypos] = ' '
         else:
             self._ypos -= 1
-            if self.world_map.world_map[self._xpos][self._ypos] == 'p':
+            if self.world.world_map[self._xpos][self._ypos] == 'p':
                 self._score += 1
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
-            elif self.world_map.world_map[self._xpos][self._ypos] == 'f':
+                self.world.world_map[self._xpos][self._ypos] = ' '
+            elif self.world.world_map[self._xpos][self._ypos] == 'f':
                 self._score += 10
-                self.world_map.world_map[self._xpos][self._ypos] = ' '
+                self.world.world_map[self._xpos][self._ypos] = ' '
                 
     def valid_roll(self,roll):
         if roll == 0:
-            if self._xpos == self.world_map.x_dim()-1:
+            if self._xpos == self.world.x_dim()-1:
                 return False
-            elif (self.world_map.world_map[self._xpos+1][self._ypos] == 'w'):
+            elif (self.world.world_map[self._xpos+1][self._ypos] == 'w'):
                 return False
         elif roll == 1:
-            if self._ypos == self.world_map.y_dim()-1:
+            if self._ypos == self.world.y_dim()-1:
                 return False
-            elif self.world_map.world_map[self._xpos][self._ypos+1] == 'w':
+            elif self.world.world_map[self._xpos][self._ypos+1] == 'w':
                 return False
         elif roll == 2:
             if self._xpos == 0:
                 return False
-            elif self.world_map.world_map[self._xpos-1][self._ypos] == 'w':
+            elif self.world.world_map[self._xpos-1][self._ypos] == 'w':
                 return False
         elif roll == 3:
             if self._ypos == 0:
                 return False
-            elif self.world_map.world_map[self._xpos][self._ypos-1] == 'w':
+            elif self.world.world_map[self._xpos][self._ypos-1] == 'w':
                 return False
         return True
     
@@ -83,7 +84,7 @@ class PacMan:
         
 class Ghost:
     def __init__(self,world,sym):
-        self.world_map = copy.copy(world)
+        self.world = copy.copy(world)
         self._symbol= sym
         self._xpos = world.x_dim()-1
         self._ypos = world.y_dim()-1
@@ -102,24 +103,24 @@ class Ghost:
             self._ypos -= 1
     def valid_roll(self,roll):
         if roll == 0:
-            if self._xpos == self.world_map.x_dim()-1:
+            if self._xpos == self.world.x_dim()-1:
                 return False
-            elif (self.world_map.world_map[self._xpos+1][self._ypos] == 'w'):
+            elif (self.world.world_map[self._xpos+1][self._ypos] == 'w'):
                 return False
         elif roll == 1:
-            if self._ypos == self.world_map.y_dim()-1:
+            if self._ypos == self.world.y_dim()-1:
                 return False
-            elif self.world_map.world_map[self._xpos][self._ypos+1] == 'w':
+            elif self.world.world_map[self._xpos][self._ypos+1] == 'w':
                 return False
         elif roll == 2:
             if self._xpos == 0:
                 return False
-            elif self.world_map.world_map[self._xpos-1][self._ypos] == 'w':
+            elif self.world.world_map[self._xpos-1][self._ypos] == 'w':
                 return False
         elif roll == 3:
             if self._ypos == 0:
                 return False
-            elif self.world_map.world_map[self._xpos][self._ypos-1] == 'w':
+            elif self.world.world_map[self._xpos][self._ypos-1] == 'w':
                 return False
         return True
     
