@@ -1,2 +1,2 @@
-# PacManGA
-Co-evolutionary learning for Pac-Man Games
+# Random Search
+PacMan and Ghosts move randomly across the map
