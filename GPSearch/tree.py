@@ -4,10 +4,11 @@ import scipy as sp
 import sys
 from scipy.spatial.distance import cityblock
 from PrettyPrint import PrettyPrintTree
-import copy
 
 class PacTree:
     norder = 0
+    nonterminals = []
+    terminals = []
     def __init__(self,mdepth=1,size=2,prob=0):
         self._size = size
         self._root = self.Node(op=self.select_op_nt(),depth=0,mdepth=mdepth)
@@ -22,6 +23,7 @@ class PacTree:
             children = []
             for i in range(self._size):
                 self.norder += 1
+                self.terminals.append(self.norder)
                 children.append(self.Node(op=self.select_op_t(),children=[],depth=depth+1,order=self.norder))
             node.set_children(children)
         #Otherwise, grow stochastically
@@ -37,17 +39,19 @@ class PacTree:
                 children = []
                 for i in range(self._size):
                     self.norder += 1
+                    self.terminals.append(self.norder)
                     children.append(self.Node(op=self.select_op_t(),children=[],depth=depth+1,order=self.norder))
             else:
                 for i in range(count):
                     self.norder += 1
+                    self.nonterminals.append(self.norder)
                     child = self.Node(op=self.select_op_nt(),children=[],depth=depth+1,mdepth=mdepth,order=self.norder)
                     self.grow(child,depth+1,mdepth,prob,self.norder)
                     children.append(child)
             node.set_children(children)
             
     def prune(self,node,select):
-        if node.get_order() == select:
+        if node.get_order() == select and node.get_children():
             self.delete_nodes(node)
             return True
         else:
@@ -68,10 +72,9 @@ class PacTree:
                     for child in children:
                         if child.get_children():
                             node.set_children(child.get_children())
-                    self.norder = 0
-                    self.update_order(self.get_root())
+            self.norder = 0
+            self.update_order(self.get_root(),clean=True)
 
-                            
     def delete_nodes(self,node):
         children = node.get_children()
         if children:
@@ -79,20 +82,33 @@ class PacTree:
                 self.delete_nodes(child)
             children.clear()
             
-    def update_order(self,node):
+    def update_order(self,node,clean=False):
+        if clean:
+            self.terminals = []
+            self.nonterminals = []
         node.set_order(self.norder)
         children = node.get_children()
         if children:
             for child in children:
                 self.norder += 1
+                if child.get_children():
+                    self.nonterminals.append(self.norder)
                 self.update_order(child)
-            
+        else:
+            self.terminals.append(self.norder)
+                
     def check_terminal(self,node):
         terminals = {'ghost','pill','walls','fruit'}
         if node.get_operator in terminals:
             return True
         else:
             return False
+        
+    def get_terminals(self):
+        return self.terminals
+    
+    def get_nonterminals(self):
+        return self.nonterminals
     
     def select_op_nt(self):
         rnum = np.random.randint(0,5)
@@ -152,12 +168,8 @@ class PacTree:
         def get_operator(self):
             return self._operator
         
-        def copy(self,node):
-            return copy.deepcopy(node)
-            
-
 def test_tree():
-    test = PacTree(mdepth=3,size=2,prob=0)
+    test = PacTree(mdepth=3,size=2,prob=0.05)
     return test
 
 x = test_tree()
@@ -165,10 +177,14 @@ x = test_tree()
 z = x.get_root()
 pt = PrettyPrintTree(lambda z: z._children, lambda z: z._order)
 pt(x.get_root())
+print(x.get_terminals())
+print(x.get_nonterminals())
 x.prune(x.get_root(),3)
-x.prune(x.get_root(),17)
 pt = PrettyPrintTree(lambda z: z._children, lambda z: z._order)
 pt(x.get_root())
+print(x.get_terminals())
+print(x.get_nonterminals())
+
 
 '''
     def manhattan_ghost(m,g):
