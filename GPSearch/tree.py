@@ -6,21 +6,22 @@ from scipy.spatial.distance import cityblock
 from PrettyPrint import PrettyPrintTree
 
 class PacTree:
+    norder = 0
     def __init__(self,mdepth=1,size=2,prob=0):
-        #Size = size-1 because we start with zero
         self._size = size
         self._root = self.Node(op=self.select_op_nt(),depth=0,mdepth=mdepth)
-        self.grow(self._root,0,mdepth,prob)
+        self.grow(self._root,0,mdepth,prob,0)
         
     def get_root(self):
         return self._root
     
-    def grow(self,node,depth,mdepth,prob):
+    def grow(self,node,depth,mdepth,prob,order):
         #If at max depth, set nonterminal children
         if depth == mdepth:
             children = []
             for i in range(self._size):
-                children.append(self.Node(op=self.select_op_t(),children=[],depth=depth))
+                self.norder += 1
+                children.append(self.Node(op=self.select_op_t(),children=[],depth=depth,order=self.norder))
             node.set_children(children)
         #Otherwise, grow stochastically
         else:
@@ -30,18 +31,22 @@ class PacTree:
                 p = np.random.rand()
                 if p >= prob:
                     count += 1
-                    child = self.Node(op=self.select_op_nt(),children=[],depth=depth,mdepth=mdepth)
-                    self.grow(child,depth+1,mdepth,prob)
-                    children.append(child)
-            #If no nonterminal children are created, create a terminal child
+            #If not enough nonterminal children are created, create a terminal children. Otherwise, proceed
             if count <= 1:
                 children = []
                 for i in range(self._size):
-                    children.append(self.Node(op=self.select_op_t(),children=[],depth=depth))
+                    self.norder += 1
+                    children.append(self.Node(op=self.select_op_t(),children=[],depth=depth,order=self.norder))
+            else:
+                for i in range(count):
+                    self.norder += 1
+                    child = self.Node(op=self.select_op_nt(),children=[],depth=depth,mdepth=mdepth,order=self.norder)
+                    self.grow(child,depth+1,mdepth,prob,self.norder)
+                    children.append(child)
             node.set_children(children)
         
     def select_op_nt(self):
-        rnum = np.random.randint(0,4)
+        rnum = np.random.randint(0,5)
         match rnum:
             case 0:
                 return '+'
@@ -55,7 +60,7 @@ class PacTree:
                 return 'r'
 
     def select_op_t(self):
-        rnum = np.random.randint(0,3)
+        rnum = np.random.randint(0,4)
         match rnum:
             case 0:
                 return 'ghost'
@@ -67,12 +72,13 @@ class PacTree:
                 return 'fruit'
             
     class Node:
-        def __init__(self,op='',children=[],depth=0,mdepth=1,size=2):
+        def __init__(self,op='',children=[],depth=0,mdepth=1,size=2,order=0):
             self._children = children
             self._operator = op
             self._depth = depth
             self._mdepth = mdepth
             self._size = size
+            self._order = order
             
         def get_children(self):
             if self._children:
@@ -85,13 +91,16 @@ class PacTree:
                 self._children.append(child)
 
 def test_tree():
-    test = PacTree(mdepth=3,size=2,prob=.15)
+    test = PacTree(mdepth=3,size=2,prob=.10)
     return test
 
 x = test_tree()
+#x.prune(x.get_root())
 z = x.get_root()
-pt = PrettyPrintTree(lambda z: z._children, lambda z: z._operator)
+pt = PrettyPrintTree(lambda z: z._children, lambda z: z._order)
 pt(x.get_root())
+#pt = PrettyPrintTree(lambda z: z._children, lambda z: z._operator)
+#pt.x.get_root()
 
 '''
     def manhattan_ghost(m,g):
