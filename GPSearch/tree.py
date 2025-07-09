@@ -125,7 +125,7 @@ class PacTree:
                 return 'r'
 
     def select_op_t(self):
-        rnum = np.random.randint(0,4)
+        rnum = np.random.randint(0,5)
         match rnum:
             case 0:
                 return 'ghost'
@@ -135,6 +135,8 @@ class PacTree:
                 return 'walls'
             case 3:
                 return 'fruit'
+            case 4:
+                return 'rand'
             
     class Node:
         def __init__(self,op='',children=[],depth=0,mdepth=1,size=2,order=0):
@@ -167,7 +169,7 @@ class PacTree:
         
         def get_operator(self):
             return self._operator
-        
+'''
 def test_tree():
     test = PacTree(mdepth=3,size=2,prob=0.05)
     return test
@@ -184,55 +186,4 @@ pt = PrettyPrintTree(lambda z: z._children, lambda z: z._order)
 pt(x.get_root())
 print(x.get_terminals())
 print(x.get_nonterminals())
-
-
-'''
-    def manhattan_ghost(m,g):
-        distances = []
-        for ghost in g:
-            distances.append(cityblock([m.x_pos(),m.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
-        return np.minimum(distances)
-
-    def manhattan_pill(m,world):
-        coords = []
-        for w in range(world.x_dim()):
-            for z in range(world.y_dim()):
-                if world.world_map[w][z] == 'p':
-                    coords.append([w,z])
-        return sp.spatial.distance.cdist([[m.x_pos(),m.y_pos()]],coords,'cityblock').min()
-
-    def walls(m,world):
-        count = 0
-        if m.x_pos()-1 == 'w':
-            count += 1
-        if m.x_pos()+1 == 'w':
-            count += 1
-        if m.y_pos()-1 == 'w':
-            count += 1
-        if m.y_pos()+1 == 'w':
-            count += 1
-        return count
-
-    def add(node):
-        children = node.get_children()
-        return np.add(children[0],children[1])
-
-    def sub(node):
-        children = node.get_children()
-        return np.subtract(children[0],children[1])
-
-    def mult(node):
-        children = node.get_children()
-        return np.multiply(children[0],children[1])
-
-    def div(node):
-        children = node.get_children()
-        if children[1] != 0:
-            return np.divide(children[0],children[1])
-        else:
-            return sys.float_info.max
-
-    def node_rand(node):
-        children = node.get_children()
-        return np.random.uniform(children[0],children[1])
 '''

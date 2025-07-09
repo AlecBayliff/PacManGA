@@ -2,6 +2,7 @@
 from worldgen import World
 from players import PacMan
 from players import Ghost
+import controller
 import numpy as np
 
 class Game:
@@ -18,10 +19,12 @@ class Game:
         if isinstance(self._rng_init,int):
             np.random.seed(self._rng_init)
         play_world = World(self._width,self._height,self._wall_density)
+        
         pac = PacMan(play_world)
         ghost1 = Ghost(play_world,1)
         ghost2 = Ghost(play_world,2)
         ghost3 = Ghost(play_world,3)
+        pac_controller = controller.PacController(3, 2, 0)
 
         play_world.print_world()
         
@@ -43,16 +46,16 @@ class Game:
         
         for x in range(self._time_mult):
             
-            if np.random.random() < self._fruit_spawn and play_world.fruit_placed == False:
-                while(play_world.fruit_placed == False):
+            if np.random.random() < self._fruit_spawn and play_world.is_fruit() == False:
+                while(play_world.is_fruit() == False):
                     fruitx = np.random.randint(play_world.x_dim())
                     fruity = np.random.randint(play_world.y_dim())
                     if play_world.world_map[fruitx][fruity] != 'w' and play_world.world_map[fruitx][fruity] != 'p':
                         if fruitx != pac.x_pos() and fruity != pac.y_pos():
                             play_world.world_map[fruitx][fruity] = 'f'
-                            play_world.fruit_placed = True
+                            play_world.set_fruit(True)
                             f.write('f' +' '+ str(fruitx) +' '+ str(fruity)+'\n')
-            pac.move()
+            pac.move(pac_controller.evaluate(pac, [ghost1,ghost2,ghost3], play_world))
             f.write(pac.symbol() + ' ' + str(pac.x_pos()) + ' ' + str(pac.y_pos())+'\n')
             ghost1.move()
             f.write(str(ghost1.symbol()) + ' ' + str(ghost1.x_pos()) + ' ' + str(ghost1.y_pos())+'\n')

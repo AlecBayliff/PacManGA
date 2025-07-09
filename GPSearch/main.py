@@ -5,5 +5,5 @@ import tree
 from worldgen import World
 from players import PacMan, Ghost
 
-mygame = World(15,15,.25)
+mygame = Game(15,15,.25,.1,1000,42,'testout.txt')
 mygame.play()

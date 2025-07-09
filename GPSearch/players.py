@@ -1,24 +1,25 @@
 #Alec Bayliff
 import numpy as np
 import copy
+
 class Player:            
-    def valid_roll(self,roll):
-        if roll == 0:
+    def valid_roll(self,even,pos):
+        if even ==True and pos == True:
             if self._xpos == self.world.x_dim()-1:
                 return False
             elif (self.world.world_map[self._xpos+1][self._ypos] == 'w'):
                 return False
-        elif roll == 1:
+        elif even == True and pos == False:
             if self._ypos == self.world.y_dim()-1:
                 return False
             elif self.world.world_map[self._xpos][self._ypos+1] == 'w':
                 return False
-        elif roll == 2:
+        elif even == False and pos== True:
             if self._xpos == 0:
                 return False
             elif self.world.world_map[self._xpos-1][self._ypos] == 'w':
                 return False
-        elif roll == 3:
+        elif even == False and pos == False:
             if self._ypos == 0:
                 return False
             elif self.world.world_map[self._xpos][self._ypos-1] == 'w':
@@ -42,11 +43,28 @@ class PacMan(Player):
         self._ypos = 0
         self._score = 0
         
-    def move(self):
-        roll = np.random.randint(4)
-        while(self.valid_roll(roll) == False):
+    def move(self,inval):
+        if inval % 2 == 0:
+            even = True
+        else:
+            even = False
+        if inval >= 0:
+            pos = True
+        else:
+            pos = False
+
+        while(self.valid_roll(even,pos) == False):
             roll = np.random.randint(4)
-        if roll == 0:
+            match roll:
+                case 0:
+                    even = True
+                case 1:
+                    even = False
+                case 2:
+                    pos = True
+                case 3:
+                    pos = False
+        if even == True and pos == True:
             self._xpos += 1
             if self.world.world_map[self._xpos][self._ypos] == 'p':
                 self._score += 1
@@ -55,7 +73,7 @@ class PacMan(Player):
                 self._score += 10
                 self.world.world_map[self._xpos][self._ypos] = ' '
                 self.world.fruit_placed = False
-        elif roll == 1:
+        elif even == True and pos == False:
             self._ypos += 1
             if self.world.world_map[self._xpos][self._ypos] == 'p':
                 self._score += 1
@@ -63,7 +81,7 @@ class PacMan(Player):
             elif self.world.world_map[self._xpos][self._ypos] == 'f':
                 self._score += 10
                 self.world.world_map[self._xpos][self._ypos] = ' '
-        elif roll == 2:
+        elif even == False and pos == True:
             self._xpos -= 1
             if self.world.world_map[self._xpos][self._ypos] == 'p':
                 self._score += 1
@@ -79,6 +97,7 @@ class PacMan(Player):
             elif self.world.world_map[self._xpos][self._ypos] == 'f':
                 self._score += 10
                 self.world.world_map[self._xpos][self._ypos] = ' '
+
     
     def score(self):
         return self._score
@@ -92,13 +111,45 @@ class Ghost(Player):
         
     def move(self):
         roll = np.random.randint(4)
-        while(self.valid_roll(roll) == False):
+        match roll:
+            case 0:
+                even = True
+                pos = True
+            case 1:
+                even = True
+                pos = False
+            case 2:
+                even = False
+                pos = True
+            case 3:
+                even = False
+                pos = False
+                
+        while(self.valid_roll(even,pos) == False):
             roll = np.random.randint(4)
-        if roll == 0:
+            match roll:
+                case 0:
+                    even = True
+                    pos = True
+                case 1:
+                    even = True
+                    pos = False
+                case 2:
+                    even = False
+                    pos = True
+                case 3:
+                    even = False
+                    pos = False
+        if even == True and pos == True:
             self._xpos += 1
-        elif roll == 1:
+        elif even == True and pos == False:
             self._ypos += 1
-        elif roll == 2:
+        elif even == False and pos == True:
             self._xpos -= 1
         else:
             self._ypos -= 1
+            
+    def x_pos(self):
+        return self._xpos
+    def y_pos(self):
+        return self._ypos

@@ -54,6 +54,12 @@ class World:
     def y_dim(self):
         return self._ydim
     
+    def set_fruit(self,val):
+        self.fruit_placed = val
+    
+    def is_fruit(self):
+        return self.fruit_placed
+    
     def print_world(self):
         for line in self.world_map:
             print(line)
