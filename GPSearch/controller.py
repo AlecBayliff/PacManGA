@@ -5,15 +5,12 @@ Created on Tue Jul  8 18:30:30 2025
 @author: Alec
 """
 import numpy as np
-from tree import PacTree
+from tree import PacTree,GhostTree
 import scipy as sp
 import sys
 from scipy.spatial.distance import cityblock
 
-class PacController:
-    def __init__(self,mdepth,size,prob):
-        self._controller = PacTree(mdepth,size,prob).get_root()
-        
+class Controller:
     def evaluate(self,pac,ghost,world):
         controller = self.get_controller()
         output = self.operate(controller,pac,ghost,world)
@@ -22,53 +19,6 @@ class PacController:
         
     def get_controller(self):
         return self._controller
-    
-    def operate(self,node,m,g,world):
-        children = node.get_children()
-        inputs = []
-        if children:
-            for child in children:
-                inputs.append(self.operate(child,m,g,world))
-            match node.get_operator():
-                case '+':
-                    return np.sum(inputs)
-                case '-':
-                    a = inputs[0]
-                    for b in inputs[1:]:
-                        a = a - b
-                    return a
-                case '*':
-                    return np.prod(inputs)
-                case '/':
-                    a = inputs[0]
-                    for b in inputs[1:]:
-                        if b != 0:
-                            a = a / b
-                        else:
-                            return sys.float_info.max
-                    return a
-                case 'r':
-                    rnum = np.random.randint(0,len(inputs))
-                    return inputs[rnum]
-            
-        else:
-            match node.get_operator():
-                case 'ghost':
-                    return self.manhattan_ghost(m,g)
-                case 'pill':
-                    return self.manhattan_pill(m,world)
-                case 'walls':
-                    return self.walls(m,world)
-                case 'fruit':
-                    return self.manhattan_fruit(m,world)
-                case 'rand':
-                    return np.random.normal(0,100)
-        
-    def manhattan_ghost(self,m,g):
-        distances = []
-        for ghost in g:
-            distances.append(cityblock([m.x_pos(),m.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
-        return np.min(distances)
 
     def manhattan_pill(self,m,world):
         coords = []
@@ -100,3 +50,130 @@ class PacController:
         if m.y_pos()+1 == 'w':
             count += 1
         return count
+    
+class PacController(Controller):
+    def __init__(self,mdepth,size,prob):
+        self._controller = PacTree(mdepth,size,prob).get_root()
+        
+    def operate(self,node,m,g,world):
+        children = node.get_children()
+        inputs = []
+        if children:
+            for child in children:
+                inputs.append(self.operate(child,m,g,world))
+            match node.get_operator():
+                case '+':
+                    return np.sum(inputs)
+                case '-':
+                    a = inputs[0]
+                    for b in inputs[1:]:
+                        a = a - b
+                    return a
+                case '*':
+                    if not (np.inf in inputs and 0 in inputs):
+                        return np.prod(inputs)
+                    else:
+                        return 0
+                case '/':
+                    a = inputs[0]
+                    for b in inputs[1:]:
+                        if b != 0:
+                            a = a / b
+                        else:
+                            return sys.float_info.max
+                    return a
+                case 'r':
+                    rnum = np.random.randint(0,len(inputs))
+                    return inputs[rnum]
+            
+        else:
+            match node.get_operator():
+                case 'ghost':
+                    return self.manhattan_ghost(m,g)
+                case 'pill':
+                    return self.manhattan_pill(m,world)
+                case 'walls':
+                    return self.walls(m,world)
+                case 'fruit':
+                    return self.manhattan_fruit(m,world)
+                case 'rand':
+                    return np.random.normal(0,100)
+                
+    def manhattan_ghost(self,m,g):
+        distances = []
+        for ghost in g:
+            distances.append(cityblock([m.x_pos(),m.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
+        return np.min(distances)
+                
+class GhostController(Controller):
+    def __init__(self,mdepth,size,prob,ego):
+        self._controller = GhostTree(mdepth,size,prob).get_root()
+        self._ego = ego
+        
+    def operate(self,node,m,g,world):
+        children = node.get_children()
+        inputs = []
+        if children:
+            for child in children:
+                inputs.append(self.operate(child,m,g,world))
+            match node.get_operator():
+                case '+':
+                    return np.sum(inputs)
+                case '-':
+                    a = inputs[0]
+                    for b in inputs[1:]:
+                        a = a - b
+                    return a
+                case '*':
+                    if not (np.inf in inputs and 0 in inputs):
+                        return np.prod(inputs)
+                    else:
+                        return 0
+                case '/':
+                    a = inputs[0]
+                    for b in inputs[1:]:
+                        if b != 0 and b != np.inf:
+                            a = a / b
+                        elif b == 0:
+                            #WHOA! numpy can handle inf now
+                            if a >= 0:
+                                return np.inf
+                            else:
+                                return -np.inf
+                        else:
+                            return 0
+                    return a
+                case 'r':
+                    rnum = np.random.randint(0,len(inputs))
+                    return inputs[rnum]
+            
+        else:
+            match node.get_operator():
+                case 'ghost':
+                    return self.manhattan_ghost(self._ego,g)
+                case 'pill':
+                    return self.manhattan_pill(m,world)
+                case 'pac':
+                    return self.manhattan_pac(m,g)
+                case 'walls':
+                    return self.walls(m,world)
+                case 'fruit':
+                    return self.manhattan_fruit(m,world)
+                case 'rand':
+                    return np.random.normal(0,100)
+                
+    def manhattan_pac(self,m,g):
+        for ghost in range(len(g)):
+            if g[ghost].get_sym() == self._ego:
+                ego = g[ghost]
+        return cityblock([m.x_pos(),m.y_pos()],[ego.x_pos(),ego.y_pos()])
+    
+    def manhattan_ghost(self,ego,g):
+        distances = []
+        for ghost in range(len(g)):
+            if g[ghost].get_sym() == ego:
+                ego = g[ghost]
+        for ghost in g:
+            if ghost.get_sym() != ego.get_sym():
+                distances.append(cityblock([ego.x_pos(),ego.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
+        return np.min(distances)

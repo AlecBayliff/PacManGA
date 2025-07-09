@@ -1,18 +1,48 @@
 #Alec Bayliff
 import numpy as np
-import scipy as sp
-import sys
-from scipy.spatial.distance import cityblock
 from PrettyPrint import PrettyPrintTree
 
-class PacTree:
+class Tree:
     norder = 0
     nonterminals = []
     terminals = []
-    def __init__(self,mdepth=1,size=2,prob=0):
-        self._size = size
-        self._root = self.Node(op=self.select_op_nt(),depth=0,mdepth=mdepth)
-        self.grow(self._root,0,mdepth,prob,0)
+    class Node:
+        def __init__(self,op='',children=[],depth=0,mdepth=1,size=2,order=0):
+            self._children = children
+            self._operator = op
+            self._depth = depth
+            self._mdepth = mdepth
+            self._size = size
+            self._order = order
+            
+        def get_children(self):
+            if self._children:
+                return self._children
+            else:
+                return False
+            
+        def set_children(self,children):
+            self._children = []
+            for child in children:
+                self._children.append(child)
+                
+        def set_operator(self,operator):
+            self._operator = operator
+            
+        def set_order(self,order):
+            self._order = order
+                
+        def get_order(self):
+            return self._order
+        
+        def get_operator(self):
+            return self._operator
+        
+        def get_terminals(self):
+            return self.terminals
+        
+        def get_nonterminals(self):
+            return self.nonterminals
         
     def get_root(self):
         return self._root
@@ -96,19 +126,20 @@ class PacTree:
                 self.update_order(child)
         else:
             self.terminals.append(self.norder)
+    
+
+class PacTree(Tree):
+    def __init__(self,mdepth=1,size=2,prob=0):
+        self._size = size
+        self._root = self.Node(op=self.select_op_nt(),depth=0,mdepth=mdepth)
+        self.grow(self._root,0,mdepth,prob,0)
                 
     def check_terminal(self,node):
-        terminals = {'ghost','pill','walls','fruit'}
+        terminals = {'ghost','pill','walls','fruit','rand'}
         if node.get_operator in terminals:
             return True
         else:
             return False
-        
-    def get_terminals(self):
-        return self.terminals
-    
-    def get_nonterminals(self):
-        return self.nonterminals
     
     def select_op_nt(self):
         rnum = np.random.randint(0,5)
@@ -137,53 +168,46 @@ class PacTree:
                 return 'fruit'
             case 4:
                 return 'rand'
-            
-    class Node:
-        def __init__(self,op='',children=[],depth=0,mdepth=1,size=2,order=0):
-            self._children = children
-            self._operator = op
-            self._depth = depth
-            self._mdepth = mdepth
-            self._size = size
-            self._order = order
-            
-        def get_children(self):
-            if self._children:
-                return self._children
-            else:
-                return False
-            
-        def set_children(self,children):
-            self._children = []
-            for child in children:
-                self._children.append(child)
-                
-        def set_operator(self,operator):
-            self._operator = operator
-            
-        def set_order(self,order):
-            self._order = order
-                
-        def get_order(self):
-            return self._order
-        
-        def get_operator(self):
-            return self._operator
-'''
-def test_tree():
-    test = PacTree(mdepth=3,size=2,prob=0.05)
-    return test
 
-x = test_tree()
-#x.prune(x.get_root())
-z = x.get_root()
-pt = PrettyPrintTree(lambda z: z._children, lambda z: z._order)
-pt(x.get_root())
-print(x.get_terminals())
-print(x.get_nonterminals())
-x.prune(x.get_root(),3)
-pt = PrettyPrintTree(lambda z: z._children, lambda z: z._order)
-pt(x.get_root())
-print(x.get_terminals())
-print(x.get_nonterminals())
-'''
+class GhostTree(Tree):
+    def __init__(self,mdepth=1,size=2,prob=0):
+        self._size = size
+        self._root = self.Node(op=self.select_op_nt(),depth=0,mdepth=mdepth)
+        self.grow(self._root,0,mdepth,prob,0)
+        
+    def check_terminal(self,node):
+        terminals = {'ghost','pill','pac','walls','fruit','rand'}
+        if node.get_operator in terminals:
+            return True
+        else:
+            return False
+    
+    def select_op_nt(self):
+        rnum = np.random.randint(0,5)
+        match rnum:
+            case 0:
+                return '+'
+            case 1:
+                return '-'
+            case 2:
+                return '*'
+            case 3:
+                return '/'
+            case 4:
+                return 'r'
+
+    def select_op_t(self):
+        rnum = np.random.randint(0,6)
+        match rnum:
+            case 0:
+                return 'ghost'
+            case 1:
+                return 'pill'
+            case 2:
+                return 'pac'
+            case 3:
+                return 'walls'
+            case 4:
+                return 'fruit'
+            case 5:
+                return 'rand'

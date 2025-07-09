@@ -44,10 +44,17 @@ class PacMan(Player):
         self._score = 0
         
     def move(self,inval):
-        if inval % 2 == 0:
-            even = True
+        if inval != np.inf and inval != -np.inf:
+            if inval % 2 == 0:
+                even = True
+            else:
+                even = False
         else:
-            even = False
+            rnum = np.random.rand()
+            if rnum >= .5:
+                even = True
+            else:
+                even = False
         if inval >= 0:
             pos = True
         else:
@@ -109,22 +116,22 @@ class Ghost(Player):
         self._xpos = world.x_dim()-1
         self._ypos = world.y_dim()-1
         
-    def move(self):
-        roll = np.random.randint(4)
-        match roll:
-            case 0:
+    def move(self,inval):
+        if inval != np.inf and inval != -np.inf:
+            if inval % 2 == 0:
                 even = True
-                pos = True
-            case 1:
+            else:
+                even = False
+        else:
+            rnum = np.random.rand()
+            if rnum >= .5:
                 even = True
-                pos = False
-            case 2:
+            else:
                 even = False
-                pos = True
-            case 3:
-                even = False
-                pos = False
-                
+        if inval >= 0:
+            pos = True
+        else:
+            pos = False
         while(self.valid_roll(even,pos) == False):
             roll = np.random.randint(4)
             match roll:
@@ -153,3 +160,5 @@ class Ghost(Player):
         return self._xpos
     def y_pos(self):
         return self._ypos
+    def get_sym(self):
+        return self._symbol
