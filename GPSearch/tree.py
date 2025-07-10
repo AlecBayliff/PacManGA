@@ -3,16 +3,18 @@ import numpy as np
 from PrettyPrint import PrettyPrintTree
 
 class Tree:
-    norder = 0
-    nonterminals = []
-    terminals = []
+    def __init__(self):
+        self._norder = 0
+        self._nonterminals = []
+        self._terminals = []
+
     class Node:
         def __init__(self,op='',children=[],depth=0,mdepth=1,size=2,order=0):
             self._children = children
             self._operator = op
-            self._depth = depth
-            self._mdepth = mdepth
-            self._size = size
+            #self._depth = depth
+            #self._mdepth = mdepth
+            #self._size = size
             self._order = order
             
         def get_children(self):
@@ -38,23 +40,26 @@ class Tree:
         def get_operator(self):
             return self._operator
         
-        def get_terminals(self):
-            return self.terminals
-        
-        def get_nonterminals(self):
-            return self.nonterminals
+    def get_terminals(self):
+        return self._terminals
+    
+    def get_nonterminals(self):
+        return self._nonterminals
         
     def get_root(self):
         return self._root
+    
+    def inc_order(self):
+        self._norder += 1
     
     def grow(self,node,depth,mdepth,prob,order):
         #If at max depth, set terminal children
         if depth == mdepth:
             children = []
             for i in range(self._size):
-                self.norder += 1
-                self.terminals.append(self.norder)
-                children.append(self.Node(op=self.select_op_t(),children=[],depth=depth+1,order=self.norder))
+                self.inc_order()
+                self._terminals.append(self._norder)
+                children.append(self.Node(op=self.select_op_t(),children=[],depth=depth+1,order=self._norder))
             node.set_children(children)
         #Otherwise, grow stochastically
         else:
@@ -68,15 +73,15 @@ class Tree:
             if count <= 1:
                 children = []
                 for i in range(self._size):
-                    self.norder += 1
-                    self.terminals.append(self.norder)
-                    children.append(self.Node(op=self.select_op_t(),children=[],depth=depth+1,order=self.norder))
+                    self.inc_order()
+                    self._terminals.append(self._norder)
+                    children.append(self.Node(op=self.select_op_t(),children=[],depth=depth+1,order=self._norder))
             else:
                 for i in range(count):
-                    self.norder += 1
-                    self.nonterminals.append(self.norder)
-                    child = self.Node(op=self.select_op_nt(),children=[],depth=depth+1,mdepth=mdepth,order=self.norder)
-                    self.grow(child,depth+1,mdepth,prob,self.norder)
+                    self.inc_order()
+                    self._nonterminals.append(self._norder)
+                    child = self.Node(op=self.select_op_nt(),children=[],depth=depth+1,mdepth=mdepth,order=self._norder)
+                    self.grow(child,depth+1,mdepth,prob,self._norder)
                     children.append(child)
             node.set_children(children)
             
@@ -102,8 +107,8 @@ class Tree:
                     for child in children:
                         if child.get_children():
                             node.set_children(child.get_children())
-            self.norder = 0
-            self.update_order(self.get_root(),clean=True)
+            self.reset_order()
+            self.update_order(self.get_root())
 
     def delete_nodes(self,node):
         children = node.get_children()
@@ -111,29 +116,32 @@ class Tree:
             for child in children:
                 self.delete_nodes(child)
             children.clear()
-            
-    def update_order(self,node,clean=False):
-        if clean:
-            self.terminals = []
-            self.nonterminals = []
-        node.set_order(self.norder)
+    
+    def update_order(self,node):
+        self._terminals = []
+        self._nonterminals = []
+        node.set_order(self._norder)
         children = node.get_children()
         if children:
             for child in children:
-                self.norder += 1
+                self.inc_order()
                 if child.get_children():
-                    self.nonterminals.append(self.norder)
+                    self._nonterminals.append(self._norder)
                 self.update_order(child)
         else:
-            self.terminals.append(self.norder)
+            self._terminals.append(self._norder)
+            
+    def reset_order(self):
+        self._norder = 0
     
 
 class PacTree(Tree):
     def __init__(self,mdepth=1,size=2,prob=0):
+        Tree.__init__(self)
         self._size = size
         self._root = self.Node(op=self.select_op_nt(),depth=0,mdepth=mdepth)
         self.grow(self._root,0,mdepth,prob,0)
-                
+
     def check_terminal(self,node):
         terminals = {'ghost','pill','walls','fruit','rand'}
         if node.get_operator in terminals:
@@ -171,6 +179,7 @@ class PacTree(Tree):
 
 class GhostTree(Tree):
     def __init__(self,mdepth=1,size=2,prob=0):
+        Tree.__init__(self)
         self._size = size
         self._root = self.Node(op=self.select_op_nt(),depth=0,mdepth=mdepth)
         self.grow(self._root,0,mdepth,prob,0)

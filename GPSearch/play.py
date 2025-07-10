@@ -48,7 +48,6 @@ class Game:
         f.write('t' +' '+ str(self._time_mult-x) +' '+ str(pac.score())+'\n')
         
         for x in range(self._time_mult):
-            
             if np.random.random() < self._fruit_spawn and play_world.is_fruit() == False:
                 while(play_world.is_fruit() == False):
                     fruitx = np.random.randint(play_world.x_dim())
