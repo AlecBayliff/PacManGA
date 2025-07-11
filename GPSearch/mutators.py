@@ -7,32 +7,32 @@ Created on Wed Jul  9 22:20:59 2025
 import tree
 import copy
 import numpy as np
+import random
 from PrettyPrint import PrettyPrintTree
 
 def crossover(treeA,treeB):
     #Create copies of tree A and B
     copyA = copy.deepcopy(treeA)
     copyB = copy.deepcopy(treeB)
+    
     #Get the roots of each tree
     rootA = copyA.get_root()
     rootB = copyB.get_root()
+    
     #Get the nonterminals to select a crossover point
-    ntermsA = treeA.get_nonterminals()
-    ntermsB = treeB.get_nonterminals()
-    if ntermsA:
-        selectA = ntermsA[np.random.randint(0,len(ntermsA))]
-    else:
-        selectA = 0
-    if ntermsB:
-        selectB = ntermsB[np.random.randint(0,len(ntermsB))]
-    else:
-        selectB = 0
+    ntermsA = copyA.get_nonterminals()
+    ntermsB = copyB.get_nonterminals()
+    selectA = random.choice(ntermsA)
+    selectB = random.choice(ntermsB)
+    
     #Find the crossover node
-    subtreeA = copy.deepcopy(find_node(rootA,selectA))
-    subtreeB = copy.deepcopy(find_node(rootB,selectB))
+    subtreeA = copy.deepcopy(copyA.find_node(rootA,selectA))
+    subtreeB = copy.deepcopy(copyB.find_node(rootB,selectB))
+    
     #Perform the crossover
-    replace_node(rootA,subtreeB,selectA)
-    replace_node(rootB,subtreeA,selectB)
+    copyA.replace_node(rootA,subtreeB,selectA)
+    copyB.replace_node(rootB,subtreeA,selectB)
+    
     #Update the new trees accordingly
     copyA.reset_order()
     copyA.update_order(copyA.get_root())
@@ -40,52 +40,98 @@ def crossover(treeA,treeB):
     copyB.update_order(copyB.get_root())
     return [copyA,copyB]
 
-    
-def find_node(node,num):
-    #If root is the node we're looking for, return it
-    if node.get_order() == num:
-        return node
-    #Otherwise, proceed to search for the node
-    children = node.get_children()
-    if children:
-        count = -1
-        for child in children:
-            if child.get_order() < num:
-                count += 1
-            elif child.get_order() == num:
-                return child
-        node = find_node(children[count],num)
-        return node
-    
-def replace_node(node,rep,num):
-    if num == 0:
-        node.set_children(rep.get_children())
-        node.set_operator(rep.get_operator())
-        return
-    children = node.get_children()
-    if children:
-        count = -1
-        for child in children:
-            if child.get_order() < num:
-                count += 1
-            elif child.get_order() == num:
-                if rep.get_children():
-                    child.set_children(rep.get_children())
-                else:
-                    rep.set_children([])
-                child.set_operator(rep.get_operator())
-                return
-        replace_node(children[count],rep,num)
+def translocation(tree):
+    root = tree.get_root()
+    #Handle the case where root is the only terminal
+    if len(tree.get_nonterminals()) == 1:
+        children = copy.deepcopy(root.get_children())
+        nodeA = random.choice(children)
+        nodeB = random.choice(children)
+        if nodeA.get_order() == nodeB.get_order():
+            while(nodeA.get_order() == nodeB.get_order()):
+                nodeB = random.choice(children)
+        tree.replace_node(root,nodeA,nodeB.get_order())
+        tree.replace_node(root,nodeB,nodeA.get_order())
+        tree.reset_order()
+        tree.update_order(root)
+        return tree
             
-treeA = tree.PacTree(2,3,0.5)
-treeB = tree.PacTree(2,3,0.1)
+    tornt = bool(random.getrandbits(1))
+    if tornt:
+        select = tree.get_nonterminals()
+    else:
+        select = tree.get_terminals()
+    selectA = random.choice(select)
+    selectB = random.choice(select)
+    if selectA == selectB:
+        while selectB == selectA:
+            selectB = random.choice(select)
+    subtreeA = copy.deepcopy(tree.find_node(root,selectA))
+    subtreeB = copy.deepcopy(tree.find_node(root,selectB))
+    tree.replace_node(root,subtreeB,selectA)
+    tree.replace_node(root,subtreeA,selectB)
+    tree.reset_order()
+    tree.update_order(root)
+    return tree
+    
+
+        
+def point_mutation(tree):
+    copytree = copy.deepcopy(tree)
+    #Select whether or not to mutate terminal or nonterminal nodes
+    tornt = bool(random.getrandbits(1))
+    if tornt:
+        select = copytree.get_nonterminals()
+    else:
+        select = copytree.get_terminals()
+    select = random.choice(select)
+    choice = random.choice(['ins','del','mut','trans'])
+    #Don't allow deletion if there is only a single nonterminal
+    if choice == 'del' and len(copytree.get_nonterminals()) == 1:
+        while choice == 'del':
+            choice = random.choice(['ins','del','mut','trans'])
+    match choice:
+        #Instert a random tree
+        case 'ins':
+            copytree.insert(select)
+            return copytree
+        #Delete a node
+        case 'del':
+            #Don't delete the root or terminals
+            if select == 0 or select in copytree.get_terminals():
+                select = random.choice(copytree.get_nonterminals())
+                while select == 0:
+                    select = random.choice(copytree.get_nonterminals())
+            copytree.prune(copytree.get_root(),select)
+            return copytree
+        #Mutate a node
+        case 'mut':
+            node = copytree.find_node(copytree.get_root(),select)
+            current = node.get_operator()
+            #Check if terminal or nonterminal and change the operator
+            if node.check_terminal():
+                while(node.get_operator() == current):
+                    node.set_operator(node.select_op_t())
+            else:
+                while(node.get_operator() == current):
+                    node.set_operator(node.select_op_nt())
+            return copytree
+        #Replace a node with a subtree from the tree
+        case 'trans':
+            return translocation(copytree)
+            
+    
+            
+treeA = tree.PacTree(3,2,0.1)
+treeB = tree.PacTree(3,2,0.1)
 pt = PrettyPrintTree(lambda x: x._children, lambda x: x._operator)
 print('Tree A:')
 pt(treeA.get_root())
-print('Tree B: ')
-pt(treeB.get_root())
-crossA,crossB = crossover(treeA,treeB)
-print('Tree A:')
-pt(treeA.get_root())
-print('Cross A:')
-pt(crossA.get_root())
+#print('Tree B: ')
+#pt(treeB.get_root())
+for x in range(1000):
+    transA = point_mutation(treeA)
+#print('Tree A:')
+#pt(treeA.get_root())
+print('Trans A:')
+pt(transA.get_root())
