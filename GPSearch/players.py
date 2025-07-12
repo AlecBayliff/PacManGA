@@ -1,6 +1,7 @@
 #Alec Bayliff
 import numpy as np
 import copy
+import controller
 
 class Player:            
     def valid_roll(self,even,pos):
@@ -35,6 +36,21 @@ class Player:
     def symbol(self):
         return self._symbol
     
+    def controller(self):
+        return self._controller
+    
+    def set_controller(self):
+        self._controller = controller
+        
+    def score(self):
+        return self._score
+        
+    def set_score(self,score):
+        self._score = score
+        
+    def update_score(self,score):
+        self._score = self._score + score
+    
 class PacMan(Player):
     def __init__(self,world):
         self.world = copy.copy(world)
@@ -42,6 +58,7 @@ class PacMan(Player):
         self._xpos = 0
         self._ypos = 0
         self._score = 0
+        self._controller = controller.PacController(3,2,0.1)
         
     def move(self,inval):
         if inval != np.inf and inval != -np.inf:
@@ -73,38 +90,25 @@ class PacMan(Player):
                     pos = False
         if even == True and pos == True:
             self._xpos += 1
-            if self.world.world_map[self._xpos][self._ypos] == 'p':
-                self._score += 1
-                self.world.world_map[self._xpos][self._ypos] = ' '
-            elif self.world.world_map[self._xpos][self._ypos] == 'f':
-                self._score += 10
-                self.world.world_map[self._xpos][self._ypos] = ' '
-                self.world.fruit_placed = False
+            self.check_coords()
         elif even == True and pos == False:
             self._ypos += 1
-            if self.world.world_map[self._xpos][self._ypos] == 'p':
-                self._score += 1
-                self.world.world_map[self._xpos][self._ypos] = ' '
-            elif self.world.world_map[self._xpos][self._ypos] == 'f':
-                self._score += 10
-                self.world.world_map[self._xpos][self._ypos] = ' '
+            self.check_coords()
         elif even == False and pos == True:
             self._xpos -= 1
-            if self.world.world_map[self._xpos][self._ypos] == 'p':
-                self._score += 1
-                self.world.world_map[self._xpos][self._ypos] = ' '
-            elif self.world.world_map[self._xpos][self._ypos] == 'f':
-                self._score += 10
-                self.world.world_map[self._xpos][self._ypos] = ' '
+            self.check_coords()
         else:
             self._ypos -= 1
-            if self.world.world_map[self._xpos][self._ypos] == 'p':
-                self._score += 1
-                self.world.world_map[self._xpos][self._ypos] = ' '
-            elif self.world.world_map[self._xpos][self._ypos] == 'f':
-                self._score += 10
-                self.world.world_map[self._xpos][self._ypos] = ' '
-
+            self.check_coords()
+                
+    def check_coords(self):
+        if self.world.world_map[self._xpos][self._ypos] == 'p':
+            self._score += 1
+            self.world.world_map[self._xpos][self._ypos] = ' '
+        elif self.world.world_map[self._xpos][self._ypos] == 'f':
+            self._score += 10
+            self.world.world_map[self._xpos][self._ypos] = ' '
+            self.world.remove_fruit([self._xpos,self._ypos])
     
     def score(self):
         return self._score
@@ -115,6 +119,8 @@ class Ghost(Player):
         self._symbol= sym
         self._xpos = world.x_dim()-1
         self._ypos = world.y_dim()-1
+        self._score = 0
+        self._controller = controller.PacController(3,2,0.1)
         
     def move(self,inval):
         if inval != np.inf and inval != -np.inf:
@@ -155,10 +161,3 @@ class Ghost(Player):
             self._xpos -= 1
         else:
             self._ypos -= 1
-            
-    def x_pos(self):
-        return self._xpos
-    def y_pos(self):
-        return self._ypos
-    def get_sym(self):
-        return self._symbol

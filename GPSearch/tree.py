@@ -1,6 +1,5 @@
 #Alec Bayliff
 import numpy as np
-from PrettyPrint import PrettyPrintTree
 
 class Tree:
     def __init__(self):
@@ -139,6 +138,7 @@ class Tree:
             
     def reset_order(self):
         self._norder = 0
+        
 
 class PacTree(Tree):
     def __init__(self,mdepth=1,size=2,prob=0):

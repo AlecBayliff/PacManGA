@@ -6,7 +6,7 @@ class World:
         self._xdim = x_dim
         self._ydim = y_dim
         self._wall_density = wall_density
-        self.fruit_placed = False
+        self._fruit = []
         self.world_map = []
         self.generate_world()
         self.carve()
@@ -54,11 +54,14 @@ class World:
     def y_dim(self):
         return self._ydim
     
-    def set_fruit(self,val):
-        self.fruit_placed = val
+    def add_fruit(self,x,y):
+        self._fruit = [x,y]
+        
+    def remove_fruit(self,val):
+        self._fruit = []
     
-    def is_fruit(self):
-        return self.fruit_placed
+    def fruit(self):
+        return self._fruit
     
     def print_world(self):
         for line in self.world_map:

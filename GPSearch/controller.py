@@ -7,7 +7,6 @@ Created on Tue Jul  8 18:30:30 2025
 import numpy as np
 from tree import PacTree,GhostTree
 import scipy as sp
-import sys
 from scipy.spatial.distance import cityblock
 
 class Controller:
@@ -28,14 +27,11 @@ class Controller:
                     coords.append([w,z])
         return sp.spatial.distance.cdist([[m.x_pos(),m.y_pos()]],coords,'cityblock').min()
     
-    def manhattan_fruit(self,m,world):
-        coords = []
-        if world.is_fruit():
-            for w in range(world.x_dim()):
-                for z in range(world.y_dim()):
-                    if world.world_map[w][z] == 'f':
-                        coords.append([w,z])
-            return sp.spatial.distance.cdist([[m.x_pos(),m.y_pos()]],coords,'cityblock').min()
+    def manhattan_fruit(self,player,world):
+        if world.fruit():
+            coords = world.fruit()
+            return cityblock([player.x_pos(),player.y_pos()],coords)
+            #return sp.spatial.distance.cdist([m.x_pos(),m.y_pos()],coords,'cityblock')
         else:
             return world.x_dim() * world.y_dim()
 
@@ -70,17 +66,15 @@ class PacController(Controller):
                         a = a - b
                     return a
                 case '*':
-                    if not (np.inf in inputs and 0 in inputs):
-                        return np.prod(inputs)
-                    else:
-                        return 0
+                    return np.prod(inputs)
                 case '/':
                     a = inputs[0]
                     for b in inputs[1:]:
                         if b != 0:
                             a = a / b
                         else:
-                            return sys.float_info.max
+                            #Return a number higher than the maximum distance of the worold
+                            return np.sqrt(np.square(world.x_dim())+np.square(world.y_dim()))+1
                     return a
                 case 'r':
                     rnum = np.random.randint(0,len(inputs))
@@ -116,6 +110,7 @@ class GhostController(Controller):
         if children:
             for child in children:
                 inputs.append(self.operate(child,m,g,world))
+            print(node.get_operator())
             match node.get_operator():
                 case '+':
                     return np.sum(inputs)
@@ -125,21 +120,17 @@ class GhostController(Controller):
                         a = a - b
                     return a
                 case '*':
-                    if not (np.inf in inputs and 0 in inputs):
-                        return np.prod(inputs)
-                    else:
-                        return 0
+                    return np.prod(inputs)
                 case '/':
                     a = inputs[0]
                     for b in inputs[1:]:
-                        if b != 0 and b != np.inf:
+                        if b != 0:
                             a = a / b
                         elif b == 0:
-                            #WHOA! numpy can handle inf now
-                            if a >= 0:
-                                return np.inf
+                            if a > 0:
+                                return np.sqrt(np.square(world.x_dim())+np.square(world.y_dim()))+1
                             else:
-                                return -np.inf
+                                return -np.sqrt(np.square(world.x_dim())+np.square(world.y_dim()))+1
                         else:
                             return 0
                     return a
@@ -164,16 +155,16 @@ class GhostController(Controller):
                 
     def manhattan_pac(self,m,g):
         for ghost in range(len(g)):
-            if g[ghost].get_sym() == self._ego:
+            if g[ghost].symbol() == self._ego:
                 ego = g[ghost]
         return cityblock([m.x_pos(),m.y_pos()],[ego.x_pos(),ego.y_pos()])
     
     def manhattan_ghost(self,ego,g):
         distances = []
         for ghost in range(len(g)):
-            if g[ghost].get_sym() == ego:
+            if g[ghost].symbol() == ego:
                 ego = g[ghost]
         for ghost in g:
-            if ghost.get_sym() != ego.get_sym():
+            if ghost.symbol() != ego.symbol():
                 distances.append(cityblock([ego.x_pos(),ego.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
         return np.min(distances)

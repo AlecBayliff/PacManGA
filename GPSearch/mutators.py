@@ -4,11 +4,8 @@ Created on Wed Jul  9 22:20:59 2025
 
 @author: Alec
 """
-import tree
 import copy
-import numpy as np
 import random
-from PrettyPrint import PrettyPrintTree
 
 def crossover(treeA,treeB):
     #Create copies of tree A and B
@@ -119,19 +116,3 @@ def point_mutation(tree):
         #Replace a node with a subtree from the tree
         case 'trans':
             return translocation(copytree)
-            
-    
-            
-treeA = tree.PacTree(3,2,0.1)
-treeB = tree.PacTree(3,2,0.1)
-pt = PrettyPrintTree(lambda x: x._children, lambda x: x._operator)
-print('Tree A:')
-pt(treeA.get_root())
-#print('Tree B: ')
-#pt(treeB.get_root())
-for x in range(1000):
-    transA = point_mutation(treeA)
-#print('Tree A:')
-#pt(treeA.get_root())
-print('Trans A:')
-pt(transA.get_root())
