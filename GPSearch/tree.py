@@ -11,9 +11,6 @@ class Tree:
         def __init__(self,op=None,children=[],depth=0,mdepth=1,size=2,order=0):
             self._children = children
             self._operator = op
-            #self._depth = depth
-            #self._mdepth = mdepth
-            #self._size = size
             self._order = order
             
         def get_children(self):
@@ -192,9 +189,6 @@ class PacTree(Tree):
                 self._operator = op
             else:
                 self._operator = self.select_op_nt()
-            #self._depth = depth
-            #self._mdepth = mdepth
-            #self._size = size
             self._order = order
         def check_terminal(self):
             terminals = {'ghost','pill','walls','fruit','rand'}

@@ -20,8 +20,6 @@ class Game:
         ghost_controllers = []
         for g in range(self.nghosts()):
             ghost_controllers.append(ghosts[g].controller())
-
-        #play_world.print_world()
         
         f = open(self._file_name,'w')
         f.write(str(play_world.x_dim())+'\n')
@@ -53,6 +51,9 @@ class Game:
                             fruit_spawned = True
             pac.move(pac_controller.evaluate(pac, ghosts, play_world))
             f.write(pac.symbol() + ' ' + str(pac.x_pos()) + ' ' + str(pac.y_pos())+'\n')
+            if not play_world.pills():
+                pac.win_score(x,self._time_mult)
+                break;
             
             for g in range(self.nghosts()):
                 ghosts[g].move(ghost_controllers[g].evaluate(pac,ghosts,play_world))
@@ -61,6 +62,7 @@ class Game:
                 if pac.x_pos() == ghosts[g].x_pos() and pac.y_pos() == ghosts[g].y_pos():
                     score = (self._time_mult - x)
                     ghosts[g].set_score(score)
+                    pac.final_score()
                     ghost_win[g] = True
             
             f.write('t' +' '+ str(self._time_mult-1-x) +' '+ str(pac.score())+'\n')
@@ -68,6 +70,7 @@ class Game:
             if True in ghost_win:
                 for g in range(self.nghosts()):
                     ghosts[g].update_score(x/2)
+                    ghosts[g].final_score()
                 break;
             
         f.write('t' +' '+ str(self._time_mult-1-x) +' '+ str(pac.score())+'\n')

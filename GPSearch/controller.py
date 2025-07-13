@@ -47,9 +47,14 @@ class Controller:
             count += 1
         return count
     
+    def size(self):
+        return self._size
+    
 class PacController(Controller):
     def __init__(self,mdepth,size,prob):
-        self._controller = PacTree(mdepth,size,prob).get_root()
+        self._tree = PacTree(mdepth,size,prob)
+        self._controller = self._tree.get_root()
+        self._size = self._tree.get_terminals()[-1]
         
     def operate(self,node,m,g,world):
         children = node.get_children()
@@ -101,7 +106,9 @@ class PacController(Controller):
                 
 class GhostController(Controller):
     def __init__(self,mdepth,size,prob,ego):
-        self._controller = GhostTree(mdepth,size,prob).get_root()
+        self._tree = GhostTree(mdepth,size,prob)
+        self._controller = self._tree.get_root()
+        self._size = self._tree.get_terminals()[-1]
         self._ego = ego
         
     def operate(self,node,m,g,world):
@@ -110,7 +117,6 @@ class GhostController(Controller):
         if children:
             for child in children:
                 inputs.append(self.operate(child,m,g,world))
-            print(node.get_operator())
             match node.get_operator():
                 case '+':
                     return np.sum(inputs)

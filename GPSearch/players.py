@@ -50,6 +50,13 @@ class Player:
         
     def update_score(self,score):
         self._score = self._score + score
+        
+    def final_score(self):
+        print('------------------')
+        print(self._score)
+        self._score = self._score / self._controller.size()
+        print(self._score)
+        print('------------------')
     
 class PacMan(Player):
     def __init__(self,world):
@@ -103,6 +110,7 @@ class PacMan(Player):
                 
     def check_coords(self):
         if self.world.world_map[self._xpos][self._ypos] == 'p':
+            self.world.remove_pill(self._xpos,self._ypos)
             self._score += 1
             self.world.world_map[self._xpos][self._ypos] = ' '
         elif self.world.world_map[self._xpos][self._ypos] == 'f':
@@ -110,8 +118,9 @@ class PacMan(Player):
             self.world.world_map[self._xpos][self._ypos] = ' '
             self.world.remove_fruit([self._xpos,self._ypos])
     
-    def score(self):
-        return self._score
+    def win_score(self,t,tmult):
+        self._score = self._score * (2-(t/tmult))
+        self._score = self.score / self._controller.size()
         
 class Ghost(Player):
     def __init__(self,world,sym):

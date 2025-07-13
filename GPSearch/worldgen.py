@@ -7,6 +7,7 @@ class World:
         self._ydim = y_dim
         self._wall_density = wall_density
         self._fruit = []
+        self._pills = []
         self.world_map = []
         self.generate_world()
         self.carve()
@@ -30,6 +31,7 @@ class World:
                     if np.random.random() > self._wall_density:
                         if np.random.random() > self._wall_density and self.check_neighbor(augmented_world,x,y):
                             augmented_world[x][y] = 'p'
+                            self.add_pill(x,y)
                         elif self.check_neighbor(augmented_world,x,y):
                             augmented_world[x][y] = ' '
         self.world_map = augmented_world
@@ -62,6 +64,15 @@ class World:
     
     def fruit(self):
         return self._fruit
+    
+    def add_pill(self,x,y):
+        self._pills.append([x,y])
+        
+    def remove_pill(self,x,y):
+        self._pills.remove([x,y])
+        
+    def pills(self):
+        return self._pills
     
     def print_world(self):
         for line in self.world_map:
