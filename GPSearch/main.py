@@ -6,7 +6,7 @@ from players import PacMan, Ghost
 mdepth = 3
 treesize = 2
 prob = .1
-play_world = World(15,15,.25)
+play_world = World(15,15,.25,.75)
 pacman = PacMan(mdepth,treesize,prob,play_world)
 ghosts = [Ghost(mdepth,treesize,prob,play_world,g+1) for g in range(3)]
 

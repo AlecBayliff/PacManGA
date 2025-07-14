@@ -2,29 +2,28 @@
 import numpy as np
 import copy
 import controller
-from PrettyPrint import PrettyPrintTree
 
 class Player:            
     def valid_roll(self,even,pos):
         if even ==True and pos == True:
             if self._xpos == self.world.x_dim()-1:
                 return False
-            elif (self.world.world_map[self._xpos+1][self._ypos] == 'w'):
+            elif (self.world.world_map()[self._xpos+1][self._ypos] == 'w'):
                 return False
         elif even == True and pos == False:
             if self._ypos == self.world.y_dim()-1:
                 return False
-            elif self.world.world_map[self._xpos][self._ypos+1] == 'w':
+            elif self.world.world_map()[self._xpos][self._ypos+1] == 'w':
                 return False
         elif even == False and pos== True:
             if self._xpos == 0:
                 return False
-            elif self.world.world_map[self._xpos-1][self._ypos] == 'w':
+            elif self.world.world_map()[self._xpos-1][self._ypos] == 'w':
                 return False
         elif even == False and pos == False:
             if self._ypos == 0:
                 return False
-            elif self.world.world_map[self._xpos][self._ypos-1] == 'w':
+            elif self.world.world_map()[self._xpos][self._ypos-1] == 'w':
                 return False
         return True
     
@@ -106,13 +105,13 @@ class PacMan(Player):
             self.check_coords()
                 
     def check_coords(self):
-        if self.world.world_map[self._xpos][self._ypos] == 'p':
+        if self.world.world_map()[self._xpos][self._ypos] == 'p':
             self.world.remove_pill(self._xpos,self._ypos)
             self._score += 1
-            self.world.world_map[self._xpos][self._ypos] = ' '
-        elif self.world.world_map[self._xpos][self._ypos] == 'f':
+            self.world.world_map()[self._xpos][self._ypos] = ' '
+        elif self.world.world_map()[self._xpos][self._ypos] == 'f':
             self._score += 10
-            self.world.world_map[self._xpos][self._ypos] = ' '
+            self.world.world_map()[self._xpos][self._ypos] = ' '
             self.world.remove_fruit()
     
     def win_score(self,t,tmult):

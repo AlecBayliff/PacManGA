@@ -84,10 +84,8 @@ class Tree:
                     for child in children:
                         if child.get_children():
                             node.set_children(child.get_children())
-                            
             self.reset_order()
             self.update_order(self.get_root())
-            
             
     def find_node(self,node,num):
         #If root is the node we're looking for, return it
@@ -155,10 +153,9 @@ class PacTree(Tree):
     def __init__(self,mdepth=1,size=2,prob=0):
         Tree.__init__(self)
         self._size = size
+        self._prob = prob
         self._root = self.PacNode(depth=0,mdepth=mdepth)
         self.grow(self._root,0,mdepth,prob,0)
-        self._prob = prob
-        self.print_tree()
         
     def grow(self,node,depth,mdepth,prob,order):
         #If at max depth, set terminal children
@@ -247,7 +244,6 @@ class GhostTree(Tree):
         self._prob = prob
         self._root = self.GhostNode(depth=0,mdepth=mdepth)
         self.grow(self._root,0,mdepth,prob,0)
-        self.print_tree()
         
     def grow(self,node,depth,mdepth,prob,order):
         #If at max depth, set terminal children

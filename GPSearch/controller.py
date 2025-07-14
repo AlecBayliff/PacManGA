@@ -45,7 +45,6 @@ class Controller:
                 case 'r':
                     rnum = np.random.randint(0,len(inputs))
                     return inputs[rnum]
-            
         else:
             return self.check_operator(node,m,g,world)
         
@@ -56,7 +55,7 @@ class Controller:
         coords = []
         for w in range(world.x_dim()):
             for z in range(world.y_dim()):
-                if world.world_map[w][z] == 'p':
+                if world.world_map()[w][z] == 'p':
                     coords.append([w,z])
         return sp.spatial.distance.cdist([[m.x_pos(),m.y_pos()]],coords,'cityblock').min()
     

@@ -10,8 +10,8 @@ class Game:
         self._nghosts = nghosts
         
     def play(self,pac,ghosts,play_world):
-        if isinstance(self._rng_init,int):
-            np.random.seed(self._rng_init)
+        #if isinstance(self._rng_init,int):
+        #    np.random.seed(self._rng_init)
             
         pac_controller = pac.controller()
         
@@ -30,9 +30,9 @@ class Game:
         
         for x in range(play_world.x_dim()):
             for y in range(play_world.y_dim()):
-                if play_world.world_map[x][y] == 'p':
+                if play_world.world_map()[x][y] == 'p':
                     f.write('p' + ' ' + str(x) + ' ' + str(y)+'\n')
-                elif play_world.world_map[x][y] == 'w':
+                elif play_world.world_map()[x][y] == 'w':
                     f.write('w' + ' ' + str(x) + ' ' + str(y)+'\n')
         f.write('t' +' '+ str(self._time_mult-x) +' '+ str(pac.score())+'\n')
         
@@ -45,7 +45,7 @@ class Game:
                     #Not going to deal with the infinitely small chance that all spaces are filled by fruits
                     if play_world.world_map[fruitx][fruity] != 'w' and play_world.world_map[fruitx][fruity] != 'p':
                         if fruitx != pac.x_pos() and fruity != pac.y_pos():
-                            play_world.world_map[fruitx][fruity] = 'f'
+                            play_world.world_map()[fruitx][fruity] = 'f'
                             play_world.add_fruit(fruitx,fruity)
                             f.write('f' +' '+ str(fruitx) +' '+ str(fruity)+'\n')
                             fruit_spawned = True
