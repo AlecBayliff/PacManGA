@@ -56,10 +56,31 @@ class World:
     def y_dim(self):
         return self._ydim
     
+    def count_walls(self,x,y):
+        count = 0
+        if x == 0:
+            count += 1
+        elif self.world_map[x-1][y] == 'w':
+            count += 1
+        if x == self._xdim-1:
+            count += 1
+        elif self.world_map[x+1][y] == 'w':
+            count += 1
+        if y == 0:
+            count += 1
+        elif self.world_map[x][y-1] == 'w':
+            count += 1
+        if y == self._ydim-1:
+            count += 1
+        elif self.world_map[x][y+1] == 'w':
+            count += 1
+        return count
+        
+    
     def add_fruit(self,x,y):
         self._fruit = [x,y]
         
-    def remove_fruit(self,val):
+    def remove_fruit(self):
         self._fruit = []
     
     def fruit(self):

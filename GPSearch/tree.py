@@ -1,5 +1,6 @@
 #Alec Bayliff
 import numpy as np
+from PrettyPrint import PrettyPrintTree
 
 class Tree:
     def __init__(self):
@@ -35,6 +36,19 @@ class Tree:
         
         def get_operator(self):
             return self._operator
+        
+        def print_node(self):
+            count = 0
+            if self._children:
+                for c in self._children:
+                    count += 1
+            print('Children: ' + str(count))
+            print(self._operator)
+            print(self._order)
+            
+    def print_tree(self):
+        pt = PrettyPrintTree(lambda x: x._children, lambda x: x._operator)
+        pt(self._root)
         
     def get_terminals(self):
         return self._terminals
@@ -144,6 +158,7 @@ class PacTree(Tree):
         self._root = self.PacNode(depth=0,mdepth=mdepth)
         self.grow(self._root,0,mdepth,prob,0)
         self._prob = prob
+        self.print_tree()
         
     def grow(self,node,depth,mdepth,prob,order):
         #If at max depth, set terminal children
@@ -229,9 +244,10 @@ class GhostTree(Tree):
     def __init__(self,mdepth=1,size=2,prob=0):
         Tree.__init__(self)
         self._size = size
+        self._prob = prob
         self._root = self.GhostNode(depth=0,mdepth=mdepth)
         self.grow(self._root,0,mdepth,prob,0)
-        self._prob = prob
+        self.print_tree()
         
     def grow(self,node,depth,mdepth,prob,order):
         #If at max depth, set terminal children
@@ -271,6 +287,14 @@ class GhostTree(Tree):
         self.replace_node(self.get_root(), newtree.get_root(), num)
     
     class GhostNode(Tree.Node):
+        def __init__(self,op=None,children=[],depth=0,mdepth=1,size=2,order=0):
+            self._children = children
+            if op:
+                self._operator = op
+            else:
+                self._operator = self.select_op_nt()
+            self._order = order
+            
         def check_terminal(self):
             terminals = {'ghost','pill','pac','walls','fruit','rand'}
             if self.get_operator() in terminals:

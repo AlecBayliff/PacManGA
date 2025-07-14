@@ -2,6 +2,7 @@
 import numpy as np
 import copy
 import controller
+from PrettyPrint import PrettyPrintTree
 
 class Player:            
     def valid_roll(self,even,pos):
@@ -52,20 +53,16 @@ class Player:
         self._score = self._score + score
         
     def final_score(self):
-        print('------------------')
-        print(self._score)
         self._score = self._score / self._controller.size()
-        print(self._score)
-        print('------------------')
     
 class PacMan(Player):
-    def __init__(self,world):
+    def __init__(self,mdepth,size,prob,world):
         self.world = copy.copy(world)
         self._symbol = 'm'
         self._xpos = 0
         self._ypos = 0
         self._score = 0
-        self._controller = controller.PacController(3,2,0.1)
+        self._controller = controller.PacController(mdepth,size,prob)
         
     def move(self,inval):
         if inval != np.inf and inval != -np.inf:
@@ -116,20 +113,20 @@ class PacMan(Player):
         elif self.world.world_map[self._xpos][self._ypos] == 'f':
             self._score += 10
             self.world.world_map[self._xpos][self._ypos] = ' '
-            self.world.remove_fruit([self._xpos,self._ypos])
+            self.world.remove_fruit()
     
     def win_score(self,t,tmult):
         self._score = self._score * (2-(t/tmult))
         self._score = self.score / self._controller.size()
         
 class Ghost(Player):
-    def __init__(self,world,sym):
+    def __init__(self,mdepth,size,prob,world,sym):
         self.world = copy.copy(world)
         self._symbol= sym
         self._xpos = world.x_dim()-1
         self._ypos = world.y_dim()-1
         self._score = 0
-        self._controller = controller.PacController(3,2,0.1)
+        self._controller = controller.GhostController(mdepth,size,prob,sym)
         
     def move(self,inval):
         if inval != np.inf and inval != -np.inf:
