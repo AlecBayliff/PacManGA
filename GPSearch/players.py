@@ -115,8 +115,9 @@ class PacMan(Player):
             self.world.remove_fruit()
     
     def win_score(self,t,tmult):
+        #PacMan win score = (total score * 2-(time/total time)) / parsimony pressure (ln controller size)
         self._score = self._score * (2-(t/tmult))
-        self._score = self.score / self._controller.size()
+        self._score = self.score / np.log(self._controller.size())
         
 class Ghost(Player):
     def __init__(self,mdepth,size,prob,world,sym):

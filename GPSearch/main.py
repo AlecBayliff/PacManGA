@@ -17,3 +17,5 @@ print(pacman.score())
 print('GhostScores:')
 for g in ghosts:
     print(g.score())
+    
+play_world.print_world()

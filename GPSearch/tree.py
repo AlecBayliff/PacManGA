@@ -202,6 +202,8 @@ class PacTree(Tree):
             else:
                 self._operator = self.select_op_nt()
             self._order = order
+            self._depth = depth
+            
         def check_terminal(self):
             terminals = {'ghost','pill','walls','fruit','rand'}
             if self.get_operator() in terminals:
@@ -290,6 +292,7 @@ class GhostTree(Tree):
             else:
                 self._operator = self.select_op_nt()
             self._order = order
+            self._depth = depth
             
         def check_terminal(self):
             terminals = {'ghost','pill','pac','walls','fruit','rand'}

@@ -7,6 +7,9 @@ Created on Sat Jul 12 21:32:35 2025
 
 import random
 
+#Might add reward-based selection. Players can be updated with Player.update_score()
+#But keeping track of children and grandchildren would require some changes.
+
 def ktournament(players,k,replacement=False):
     if replacement == False:
         tournament = random.sample(players,k)
