@@ -11,9 +11,9 @@ from scipy.spatial.distance import cityblock
 
 
 class Controller:
-    def evaluate(self,pac,ghost,world):
+    def evaluate(self,pac,ghosts,world):
         controller = self.get_controller()
-        output = self.operate(controller,pac,ghost,world)
+        output = self.operate(controller,pac,ghosts,world)
         output = np.rint(output)
         return output
     
@@ -52,12 +52,7 @@ class Controller:
         return self._controller
 
     def manhattan_pill(self,m,world):
-        coords = []
-        for w in range(world.x_dim()):
-            for z in range(world.y_dim()):
-                if world.world_map()[w][z] == 'p':
-                    coords.append([w,z])
-        return sp.spatial.distance.cdist([[m.x_pos(),m.y_pos()]],coords,'cityblock').min()
+        return sp.spatial.distance.cdist([[m.x_pos(),m.y_pos()]],world.pills(),'cityblock').min()
     
     def manhattan_fruit(self,player,world):
         if world.fruit():
@@ -106,33 +101,40 @@ class GhostController(Controller):
         self._ego = ego
                 
     def manhattan_pac(self,m,g):
-        for ghost in range(len(g)):
-            if g[ghost].symbol() == self._ego:
-                ego = g[ghost]
-        return cityblock([m.x_pos(),m.y_pos()],[ego.x_pos(),ego.y_pos()])
+        return cityblock([m.x_pos(),m.y_pos()],[g.x_pos(),g.y_pos()])
     
-    def manhattan_ghost(self,ego,g):
+    def manhattan_ghost(self,g):
         distances = []
         for ghost in range(len(g)):
-            if g[ghost].symbol() == ego:
+            if g[ghost].symbol == self._ego:
                 ego = g[ghost]
         for ghost in g:
-            if ghost.symbol() != ego.symbol():
+            if ghost.symbol != self._ego:
                 distances.append(cityblock([ego.x_pos(),ego.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
-        return np.min(distances)
+        try:
+            return np.min(distances)
+        except:
+            print('EXCEPTION!!!')
+            print('Length of G: ' + str(len(g)))
+            for ghost in g:
+                print('Ghost: ' + str(ghost.symbol))
+            print('Ego: ' + str(self._ego))
     
     def check_operator(self,node,m,g,world):
         match node.get_operator():
             case 'ghost':
-                return self.manhattan_ghost(self._ego,g)
+                return self.manhattan_ghost(g)
             case 'pill':
                 return self.manhattan_pill(m,world)
             case 'pac':
-                return self.manhattan_pac(m,g)
+                return self.manhattan_pac(m,g[self._ego-1])
             case 'walls':
                 return self.walls(m,world)
             case 'fruit':
                 return self.manhattan_fruit(m,world)
             case 'rand':
                 return np.random.normal(0,np.sqrt(np.square(world.x_dim())+np.square(world.y_dim()))+1)
+            
+    def set_ego(self,ego):
+        self._ego = ego
         

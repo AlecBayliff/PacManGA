@@ -10,6 +10,7 @@ class World:
         self._ppill = ppill
         self._fruit = []
         self._pills = []
+        self._resetpills = []
         self._world_map = []
         self.generate_world()
         
@@ -129,6 +130,7 @@ class World:
     
     def add_pill(self,x,y):
         self._pills.append([x,y])
+        self._resetpills.append([x,y])
         
     def remove_pill(self,x,y):
         self._pills.remove([x,y])
@@ -142,3 +144,6 @@ class World:
     def print_world(self):
         for line in self._world_map:
             print(line)
+    
+    def reset_pills(self):
+        self._pills = self._resetpills.copy()

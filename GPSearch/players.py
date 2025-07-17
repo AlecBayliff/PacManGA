@@ -1,29 +1,28 @@
 #Alec Bayliff
 import numpy as np
-import copy
 import controller
 
 class Player:            
     def valid_roll(self,even,pos):
         if even ==True and pos == True:
-            if self._xpos == self.world.x_dim()-1:
+            if self._xpos == self._world.x_dim()-1:
                 return False
-            elif (self.world.world_map()[self._xpos+1][self._ypos] == 'w'):
+            elif (self._world.world_map()[self._xpos+1][self._ypos] == 'w'):
                 return False
         elif even == True and pos == False:
-            if self._ypos == self.world.y_dim()-1:
+            if self._ypos == self._world.y_dim()-1:
                 return False
-            elif self.world.world_map()[self._xpos][self._ypos+1] == 'w':
+            elif self._world.world_map()[self._xpos][self._ypos+1] == 'w':
                 return False
         elif even == False and pos== True:
             if self._xpos == 0:
                 return False
-            elif self.world.world_map()[self._xpos-1][self._ypos] == 'w':
+            elif self._world.world_map()[self._xpos-1][self._ypos] == 'w':
                 return False
         elif even == False and pos == False:
             if self._ypos == 0:
                 return False
-            elif self.world.world_map()[self._xpos][self._ypos-1] == 'w':
+            elif self._world.world_map()[self._xpos][self._ypos-1] == 'w':
                 return False
         return True
     
@@ -33,8 +32,13 @@ class Player:
     def y_pos(self):
         return self._ypos
     
+    @property
     def symbol(self):
         return self._symbol
+    
+    @symbol.setter
+    def symbol(self,sym):
+        self._symbol = sym
     
     def controller(self):
         return self._controller
@@ -53,10 +57,12 @@ class Player:
         
     def final_score(self):
         self._score = self._score / self._controller.size()
+        
+    def load_world(self,world):
+        self._world = world
     
 class PacMan(Player):
-    def __init__(self,mdepth,size,prob,world):
-        self.world = copy.copy(world)
+    def __init__(self,mdepth,size,prob):
         self._symbol = 'm'
         self._xpos = 0
         self._ypos = 0
@@ -105,26 +111,25 @@ class PacMan(Player):
             self.check_coords()
                 
     def check_coords(self):
-        if self.world.world_map()[self._xpos][self._ypos] == 'p':
-            self.world.remove_pill(self._xpos,self._ypos)
+        if self._world.world_map()[self._xpos][self._ypos] == 'p':
             self._score += 1
-            self.world.world_map()[self._xpos][self._ypos] = ' '
-        elif self.world.world_map()[self._xpos][self._ypos] == 'f':
+            self._world.world_map()[self._xpos][self._ypos] = ' '
+            self._world.remove_pill(self._xpos,self._ypos)
+        elif self._world.world_map()[self._xpos][self._ypos] == 'f':
             self._score += 10
-            self.world.world_map()[self._xpos][self._ypos] = ' '
-            self.world.remove_fruit()
+            self._world.world_map()[self._xpos][self._ypos] = ' '
+            self._world.remove_fruit()
     
     def win_score(self,t,tmult):
         #PacMan win score = (total score * 2-(time/total time)) / parsimony pressure (ln controller size)
         self._score = self._score * (2-(t/tmult))
-        self._score = self.score / np.log(self._controller.size())
+        self._score = self._score / np.log(self._controller.size())
         
 class Ghost(Player):
-    def __init__(self,mdepth,size,prob,world,sym):
-        self.world = copy.copy(world)
-        self._symbol= sym
-        self._xpos = world.x_dim()-1
-        self._ypos = world.y_dim()-1
+    def __init__(self,mdepth,size,prob,sym,xdim,ydim):
+        self._symbol = sym
+        self._xpos = xdim-1
+        self._ypos = ydim-1
         self._score = 0
         self._controller = controller.GhostController(mdepth,size,prob,sym)
         
@@ -167,3 +172,7 @@ class Ghost(Player):
             self._xpos -= 1
         else:
             self._ypos -= 1
+        
+    def reset_pos(self,xdim,ydim):
+        self._xpos = xdim - 1
+        self._ypos = ydim - 1
