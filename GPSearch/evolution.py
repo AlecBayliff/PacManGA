@@ -40,12 +40,15 @@ def run_epoch(worlds,popsize,pacmen,ghosts,nghosts,fspawn,time):
     wcount = 0
     for w in worlds:
         print('Running World '+ str(wcount))
-        fname = 'world'+str(wcount)+'.txt'
+        fname = 'worldfiles/world'+str(wcount)+'.txt'
         wcount += 1
         game = Game(fspawn,time,fname,nghosts)
         for p in range(popsize):
             gplayers = random.sample(ghosts,nghosts)
-            for x in range(nghosts):
-                gplayers[x].symbol = x + 1
+            for i in range(nghosts):
+                gplayers[i].symbol = i + 1
             game.play(pacmen[p],gplayers,w)
+            pacmen[p].update_scores(pacmen[p].score)
+            for g in gplayers:
+                g.update_scores(g.score)
             w.reset_pills()

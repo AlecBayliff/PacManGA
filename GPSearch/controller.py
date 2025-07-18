@@ -18,12 +18,12 @@ class Controller:
         return output
     
     def operate(self,node,m,g,world):
-        children = node.get_children()
+        children = node.children
         inputs = []
         if children:
             for child in children:
                 inputs.append(self.operate(child,m,g,world))
-            match node.get_operator():
+            match node.operator:
                 case '+':
                     return np.sum(inputs)
                 case '-':
@@ -40,7 +40,7 @@ class Controller:
                             a = a / b
                         else:
                             #Return a number higher than the maximum distance of the worold
-                            return np.sqrt(np.square(world.x_dim())+np.square(world.y_dim()))+1
+                            return np.sqrt(np.square(world.x_dim)+np.square(world.y_dim))+1
                     return a
                 case 'r':
                     rnum = np.random.randint(0,len(inputs))
@@ -52,18 +52,18 @@ class Controller:
         return self._controller
 
     def manhattan_pill(self,m,world):
-        return sp.spatial.distance.cdist([[m.x_pos(),m.y_pos()]],world.pills(),'cityblock').min()
+        return sp.spatial.distance.cdist([[m.x_pos,m.y_pos]],world.pills,'cityblock').min()
     
     def manhattan_fruit(self,player,world):
-        if world.fruit():
-            coords = world.fruit()
-            return cityblock([player.x_pos(),player.y_pos()],coords)
+        if world.fruit:
+            coords = world.fruit
+            return cityblock([player.x_pos,player.y_pos],coords)
 
         else:
-            return world.x_dim() * world.y_dim()
+            return world.x_dim * world.y_dim
 
     def walls(self,m,world):
-        return world.count_walls(m.x_pos(),m.y_pos())
+        return world.count_walls(m.x_pos,m.y_pos)
     
     def size(self):
         return self._size
@@ -71,17 +71,17 @@ class Controller:
 class PacController(Controller):
     def __init__(self,mdepth,size,prob):
         self._tree = PacTree(mdepth,size,prob)
-        self._controller = self._tree.get_root()
-        self._size = self._tree.get_terminals()[-1]
+        self._controller = self._tree.root
+        self._size = self._tree.terminals[-1]
                 
     def manhattan_ghost(self,m,g):
         distances = []
         for ghost in g:
-            distances.append(cityblock([m.x_pos(),m.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
+            distances.append(cityblock([m.x_pos,m.y_pos],[ghost.x_pos,ghost.y_pos]))
         return np.min(distances)
     
     def check_operator(self,node,m,g,world):
-        match node.get_operator():
+        match node.operator:
             case 'ghost':
                 return self.manhattan_ghost(m,g)
             case 'pill':
@@ -91,17 +91,17 @@ class PacController(Controller):
             case 'fruit':
                 return self.manhattan_fruit(m,world)
             case 'rand':
-                return np.random.normal(0,np.sqrt(np.square(world.x_dim())+np.square(world.y_dim()))+1)
+                return np.random.normal(0,np.sqrt(np.square(world.x_dim)+np.square(world.y_dim))+1)
                 
 class GhostController(Controller):
     def __init__(self,mdepth,size,prob,ego):
         self._tree = GhostTree(mdepth,size,prob)
-        self._controller = self._tree.get_root()
-        self._size = self._tree.get_terminals()[-1]
+        self._controller = self._tree.root
+        self._size = self._tree.terminals[-1]
         self._ego = ego
                 
     def manhattan_pac(self,m,g):
-        return cityblock([m.x_pos(),m.y_pos()],[g.x_pos(),g.y_pos()])
+        return cityblock([m.x_pos,m.y_pos],[g.x_pos,g.y_pos])
     
     def manhattan_ghost(self,g):
         distances = []
@@ -110,7 +110,7 @@ class GhostController(Controller):
                 ego = g[ghost]
         for ghost in g:
             if ghost.symbol != self._ego:
-                distances.append(cityblock([ego.x_pos(),ego.y_pos()],[ghost.x_pos(),ghost.y_pos()]))
+                distances.append(cityblock([ego.x_pos,ego.y_pos],[ghost.x_pos,ghost.y_pos]))
         try:
             return np.min(distances)
         except:
@@ -121,7 +121,7 @@ class GhostController(Controller):
             print('Ego: ' + str(self._ego))
     
     def check_operator(self,node,m,g,world):
-        match node.get_operator():
+        match node.operator:
             case 'ghost':
                 return self.manhattan_ghost(g)
             case 'pill':
@@ -133,7 +133,7 @@ class GhostController(Controller):
             case 'fruit':
                 return self.manhattan_fruit(m,world)
             case 'rand':
-                return np.random.normal(0,np.sqrt(np.square(world.x_dim())+np.square(world.y_dim()))+1)
+                return np.random.normal(0,np.sqrt(np.square(world.x_dim)+np.square(world.y_dim))+1)
             
     def set_ego(self,ego):
         self._ego = ego

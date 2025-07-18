@@ -27,9 +27,15 @@ class World:
         self._world_map[0][0] = ' '
         self._world_map[self._xdim-1][self._ydim-1] = ' '
         if random.getrandbits(1):
-            self._world_map[self._xdim-2][self._ydim-1] = ' '
+            if np.random.rand() <= self._ppill:
+                self.add_pill(self._xdim-2,self._ydim-1)
+            else:
+                self._world_map[self._xdim-2][self._ydim-1] = ' '
         else:
-            self._world_map[self._xdim-1][self._ydim-2] = ' '
+            if np.random.rand() <= self._ppill:
+                self.add_pill(self._xdim-1,self._ydim-2)
+            else:
+                self._world_map[self._xdim-1][self._ydim-2] = ' '
         self.carve(0,0,visited)
         self.remove_walls()
     
@@ -91,10 +97,12 @@ class World:
                     self._world_map[x][y] = ' '
                 wallcount -= 1
                 walld = wallcount / total
-            
+    
+    @property
     def x_dim(self):
         return self._xdim
     
+    @property
     def y_dim(self):
         return self._ydim
     
@@ -125,6 +133,7 @@ class World:
     def remove_fruit(self):
         self._fruit = []
     
+    @property
     def fruit(self):
         return self._fruit
     
@@ -134,10 +143,12 @@ class World:
         
     def remove_pill(self,x,y):
         self._pills.remove([x,y])
-        
+    
+    @property
     def pills(self):
         return self._pills
     
+    @property
     def world_map(self):
         return self._world_map
     
@@ -147,3 +158,5 @@ class World:
     
     def reset_pills(self):
         self._pills = self._resetpills.copy()
+        for p in self._pills:
+            self._world_map[p[0]][p[1]] = 'p'
