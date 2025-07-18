@@ -7,8 +7,11 @@ Created on Tue Jul 15 02:26:43 2025
 from worldgen import World
 from players import PacMan, Ghost
 from play import Game
+import selection
 import numpy as np
+import mutators
 import random
+import copy
 
 def generate_worlds(nworlds,xdim,ydim,walld,ppill):
     worlds = []
@@ -52,3 +55,40 @@ def run_epoch(worlds,popsize,pacmen,ghosts,nghosts,fspawn,time):
             for g in gplayers:
                 g.update_scores(g.score)
             w.reset_pills()
+            
+def generate_children(pacmen,popsize,parents):
+    i = 0
+    while i < (popsize-parents):
+        #Crossover
+        if bool(random.getrandbits(1)) and i < (popsize-parents)-1:
+            i+=1
+            p1,p2 = copy.deepcopy(random.choices(pacmen,k=2))
+            o1,o2 = mutators.crossover(p1.controller.tree, p2.controller.tree)
+            p1.controller.tree = o1
+            p2.controller.tree = o2
+            pacmen.append(p1)
+            pacmen.append(p2)
+        #Point Mutations
+        else:
+            p1 = copy.deepcopy(random.choice(pacmen))
+            p1.controller.tree = mutators.point_mutation(p1.controller.tree)
+            pacmen.append(p1)
+        i+=1
+        
+def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,clim,parents,epochs,sel):
+    worlds,pacmen,ghosts = initialize(popsize,mdepth,lsize,tprob,nworlds,xdim,ydim,wden,ppill)
+    for i in range(epochs):
+        print('Epoch: ' + str(i+1))
+        run_epoch(worlds,popsize, pacmen, ghosts,nghosts,fprob,gtime)
+        pacmen = selection.truncsel(pacmen, clim)
+        if sel == 'ktournament':
+            pacmen = selection.ktournament(pacmen,parents,parents)
+        else:
+            pacmen = selection.fitpropsel(pacmen,parents)
+        generate_children(pacmen, popsize, parents)
+        ghosts = selection.truncsel(ghosts,clim)
+        if sel == 'ktournament':
+            ghosts = selection.ktournament(ghosts,parents,parents)
+        else:
+            ghosts = selection.fitpropsel(ghosts,parents)
+        generate_children(ghosts,popsize,parents)

@@ -12,7 +12,7 @@ from scipy.spatial.distance import cityblock
 
 class Controller:
     def evaluate(self,pac,ghosts,world):
-        controller = self.get_controller()
+        controller = self.controller
         output = self.operate(controller,pac,ghosts,world)
         output = np.rint(output)
         return output
@@ -48,9 +48,22 @@ class Controller:
         else:
             return self.check_operator(node,m,g,world)
         
-    def get_controller(self):
+    @property
+    def controller(self):
         return self._controller
-
+    
+    @controller.setter
+    def controller(self,controller):
+        self._controller = controller
+        
+    @property
+    def tree(self):
+        return self._tree
+    
+    @tree.setter
+    def tree(self,tree):
+        self._tree = tree
+    
     def manhattan_pill(self,m,world):
         return sp.spatial.distance.cdist([[m.x_pos,m.y_pos]],world.pills,'cityblock').min()
     

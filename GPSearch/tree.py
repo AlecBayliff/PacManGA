@@ -93,12 +93,12 @@ class Tree:
 
                 #If there are not enough children for a nonterminal operation, move child up.
                 if node.check_terminal() == False and len(children) < 2:
-                    node.set_operator(children[0].operator)
+                    node.operator = children[0].operator
                     for child in children:
                         if child.children:
-                            node.set_children(child.children)
+                            node.children = child.children
             self.reset_order()
-            self.update_order(self.get_root())
+            self.update_order(self.root)
             
     def find_node(self,node,num):
         #If root is the node we're looking for, return it
@@ -119,8 +119,8 @@ class Tree:
         
     def replace_node(self,node,rep,num):
         if num == 0:
-            node.set_children(rep.children)
-            node.set_operator(rep.operator)
+            node.children = rep.children
+            node.operator = rep.operator
             return
         children = node.children
         if children:
@@ -130,10 +130,10 @@ class Tree:
                     count += 1
                 elif child.order == num:
                     if rep.children:
-                        child.set_children(rep.children)
+                        child.children = rep.children
                     else:
-                        rep.set_children([])
-                    child.set_operator(rep.operator)
+                        rep.children = []
+                    child.operator = rep.operator
                     return
             self.replace_node(children[count],rep,num)
 
@@ -147,7 +147,7 @@ class Tree:
     def update_order(self,node):
         self._terminals = []
         self._nonterminals = [0]
-        node.set_order(self._norder)
+        node.order = self._norder
         children = node.children
         if children:
             for child in children:
@@ -205,7 +205,7 @@ class PacTree(Tree):
             
     def insert(self,num):
         newtree = PacTree(mdepth=2,size=self._size,prob=self._prob)
-        self.replace_node(self.get_root(), newtree.get_root(), num)
+        self.replace_node(self.root, newtree.root, num)
         
     class PacNode(Tree.Node):
         def __init__(self,op=None,children=[],depth=0,mdepth=1,size=2,order=0):
@@ -294,8 +294,8 @@ class GhostTree(Tree):
             node.children = children
             
     def insert(self,num):
-        newtree = PacTree(m_depth=2,size=self._size,prob=self._prob)
-        self.replace_node(self.get_root(), newtree.get_root(), num)
+        newtree = GhostTree(mdepth=2,size=self._size,prob=self._prob)
+        self.replace_node(self.root, newtree.root, num)
     
     class GhostNode(Tree.Node):
         def __init__(self,op=None,children=[],depth=0,mdepth=1,size=2,order=0):

@@ -13,12 +13,12 @@ def crossover(treeA,treeB):
     copyB = copy.deepcopy(treeB)
     
     #Get the roots of each tree
-    rootA = copyA.get_root()
-    rootB = copyB.get_root()
+    rootA = copyA.root
+    rootB = copyB.root
     
     #Get the nonterminals to select a crossover point
-    ntermsA = copyA.get_nonterminals()
-    ntermsB = copyB.get_nonterminals()
+    ntermsA = copyA.nonterminals
+    ntermsB = copyB.nonterminals
     selectA = random.choice(ntermsA)
     selectB = random.choice(ntermsB)
     
@@ -32,32 +32,31 @@ def crossover(treeA,treeB):
     
     #Update the new trees accordingly
     copyA.reset_order()
-    copyA.update_order(copyA.get_root())
+    copyA.update_order(copyA.root)
     copyB.reset_order()
-    copyB.update_order(copyB.get_root())
+    copyB.update_order(copyB.root)
     return [copyA,copyB]
 
 def translocation(tree):
-    root = tree.get_root()
+    root = tree.root
     #Handle the case where root is the only terminal
-    if len(tree.get_nonterminals()) == 1:
-        children = copy.deepcopy(root.get_children())
+    if len(tree.nonterminals) == 1:
+        children = copy.deepcopy(root.children)
         nodeA = random.choice(children)
         nodeB = random.choice(children)
-        if nodeA.get_order() == nodeB.get_order():
-            while(nodeA.get_order() == nodeB.get_order()):
+        if nodeA.order == nodeB.order:
+            while(nodeA.order == nodeB.order):
                 nodeB = random.choice(children)
-        tree.replace_node(root,nodeA,nodeB.get_order())
-        tree.replace_node(root,nodeB,nodeA.get_order())
+        tree.replace_node(root,nodeA,nodeB.order)
+        tree.replace_node(root,nodeB,nodeA.order)
         tree.reset_order()
         tree.update_order(root)
         return tree
             
-    tornt = bool(random.getrandbits(1))
-    if tornt:
-        select = tree.get_nonterminals()
+    if bool(random.getrandbits(1)):
+        select = tree.nonterminals
     else:
-        select = tree.get_terminals()
+        select = tree.terminals
     selectA = random.choice(select)
     selectB = random.choice(select)
     if selectA == selectB:
@@ -76,15 +75,14 @@ def translocation(tree):
 def point_mutation(tree):
     copytree = copy.deepcopy(tree)
     #Select whether or not to mutate terminal or nonterminal nodes
-    tornt = bool(random.getrandbits(1))
-    if tornt:
-        select = copytree.get_nonterminals()
+    if bool(random.getrandbits(1)):
+        select = copytree.nonterminals
     else:
-        select = copytree.get_terminals()
+        select = copytree.terminals
     select = random.choice(select)
     choice = random.choice(['ins','del','mut','trans'])
     #Don't allow deletion if there is only a single nonterminal
-    if choice == 'del' and len(copytree.get_nonterminals()) == 1:
+    if choice == 'del' and len(copytree.nonterminals) == 1:
         while choice == 'del':
             choice = random.choice(['ins','del','mut','trans'])
     match choice:
@@ -95,23 +93,23 @@ def point_mutation(tree):
         #Delete a node
         case 'del':
             #Don't delete the root or terminals
-            if select == 0 or select in copytree.get_terminals():
-                select = random.choice(copytree.get_nonterminals())
+            if select == 0 or select in copytree.terminals:
+                select = random.choice(copytree.nonterminals)
                 while select == 0:
-                    select = random.choice(copytree.get_nonterminals())
-            copytree.prune(copytree.get_root(),select)
+                    select = random.choice(copytree.nonterminals)
+            copytree.prune(copytree.root,select)
             return copytree
         #Mutate a node
         case 'mut':
-            node = copytree.find_node(copytree.get_root(),select)
-            current = node.get_operator()
+            node = copytree.find_node(copytree.root,select)
+            current = node.operator
             #Check if terminal or nonterminal and change the operator
             if node.check_terminal():
-                while(node.get_operator() == current):
-                    node.set_operator(node.select_op_t())
+                while(node.operator == current):
+                    node.operator = node.select_op_t()
             else:
-                while(node.get_operator() == current):
-                    node.set_operator(node.select_op_nt())
+                while(node.operator == current):
+                    node.operator = node.select_op_nt()
             return copytree
         #Replace a node with a subtree from the tree
         case 'trans':

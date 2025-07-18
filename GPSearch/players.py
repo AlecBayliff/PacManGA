@@ -35,6 +35,10 @@ class Player:
     def score(self,score):
         self._score = score
         
+    @property
+    def allscores(self):
+        return self._allscores
+    
     def valid_roll(self,even,pos):
         if even ==True and pos == True:
             if self._xpos == self._world.x_dim-1:
