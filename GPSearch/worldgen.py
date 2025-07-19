@@ -28,11 +28,13 @@ class World:
         self._world_map[self._xdim-1][self._ydim-1] = ' '
         if random.getrandbits(1):
             if np.random.rand() <= self._ppill:
+                self._world_map[self._xdim-2][self.y_dim-1] = 'p'
                 self.add_pill(self._xdim-2,self._ydim-1)
             else:
                 self._world_map[self._xdim-2][self._ydim-1] = ' '
         else:
             if np.random.rand() <= self._ppill:
+                self._world_map[self._xdim-1][self._ydim-2] = 'p'
                 self.add_pill(self._xdim-1,self._ydim-2)
             else:
                 self._world_map[self._xdim-1][self._ydim-2] = ' '

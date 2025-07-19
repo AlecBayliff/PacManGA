@@ -66,12 +66,12 @@ class Player:
         self._score = self._score + score
         
     def final_score(self):
-        self._score = self._score / self._controller.size()
+        self._score = self._score / np.log(self._controller.size())
         
     def load_world(self,world):
         self._world = world
         
-    def update_scores(self,score):
+    def update_allscores(self,score):
         self._allscores.append(score)
         
     def reset_scores(self):

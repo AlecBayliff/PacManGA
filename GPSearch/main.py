@@ -1,13 +1,13 @@
 #Alec Bayliff
 import evolution
 #Number of worlds
-nworlds = 3
+nworlds = 30
 #Population size
-popsize = 15
+popsize = 30
 #Max initial tree depth
-mdepth = 3
+mdepth = 5
 #Number of leaves allowed
-lsize = 2
+lsize = 3
 #Tree generation probability
 tprob = .1
 #World x Dimension
@@ -27,10 +27,10 @@ fprob = .1
 #Game time limit
 gtime = 1000
 #Cull limit
-clim = 10
+clim = 15
 #Parents
-parents = 5
-epochs = 5
+parents = 10
+epochs = 1000
 selection = 'fitprop'
 
 evolution.run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,clim,parents,epochs,selection)

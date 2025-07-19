@@ -32,7 +32,9 @@ def fitpropsel(players,parents):
     scores = []
     for p in players:
         scores.append(np.mean(p.allscores))
-    return random.choices(players,weights=scores,k=parents)
+    sumscores = np.sum(scores)
+    scores[:] = [x / sumscores for x in scores]
+    return list(np.random.choice(players,p=scores,size=parents,replace=False))
 
 def truncsel(players,n):
     scores = []

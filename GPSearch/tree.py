@@ -68,8 +68,11 @@ class Tree:
     def root(self,node):
         self._root = node
         
-    def print_tree(self):
-        pt = PrettyPrintTree(lambda x: x._children, lambda x: x._operator)
+    def print_tree(self,ntype):
+        if ntype == 'op':
+            pt = PrettyPrintTree(lambda x: x._children, lambda x: x._operator)
+        else:
+            pt = PrettyPrintTree(lambda x: x._children, lambda x: x._order)
         pt(self._root)
     
     def inc_order(self):

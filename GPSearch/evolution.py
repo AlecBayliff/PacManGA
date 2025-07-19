@@ -45,15 +45,15 @@ def run_epoch(worlds,popsize,pacmen,ghosts,nghosts,fspawn,time):
         print('Running World '+ str(wcount))
         fname = 'worldfiles/world'+str(wcount)+'.txt'
         wcount += 1
-        game = Game(fspawn,time,fname,nghosts)
+        game = Game(fspawn,time,fname)
         for p in range(popsize):
             gplayers = random.sample(ghosts,nghosts)
             for i in range(nghosts):
                 gplayers[i].symbol = i + 1
             game.play(pacmen[p],gplayers,w)
-            pacmen[p].update_scores(pacmen[p].score)
+            pacmen[p].update_allscores(pacmen[p].score)
             for g in gplayers:
-                g.update_scores(g.score)
+                g.update_allscores(g.score)
             w.reset_pills()
             
 def generate_children(pacmen,popsize,parents):
@@ -62,16 +62,24 @@ def generate_children(pacmen,popsize,parents):
         #Crossover
         if bool(random.getrandbits(1)) and i < (popsize-parents)-1:
             i+=1
-            p1,p2 = copy.deepcopy(random.choices(pacmen,k=2))
+            p1,p2 = random.choices(pacmen,k=2)
+            p1 = copy.deepcopy(p1)
+            p2 = copy.deepcopy(p2)
             o1,o2 = mutators.crossover(p1.controller.tree, p2.controller.tree)
             p1.controller.tree = o1
+            p1.controller.tree.reset_order()
+            p1.controller.tree.update_order(p1.controller.tree.root)
             p2.controller.tree = o2
+            p2.controller.tree.reset_order()
+            p2.controller.tree.update_order(p2.controller.tree.root)
             pacmen.append(p1)
             pacmen.append(p2)
         #Point Mutations
         else:
             p1 = copy.deepcopy(random.choice(pacmen))
             p1.controller.tree = mutators.point_mutation(p1.controller.tree)
+            p1.controller.tree.reset_order()
+            p1.controller.tree.update_order(p1.controller.tree.root)
             pacmen.append(p1)
         i+=1
         

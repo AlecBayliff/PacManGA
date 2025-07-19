@@ -112,6 +112,13 @@ class GhostController(Controller):
         self._controller = self._tree.root
         self._size = self._tree.terminals[-1]
         self._ego = ego
+        
+    @property
+    def ego(self):
+        return self._ego
+    @ego.setter
+    def ego(self,ego):
+        self._ego = ego
                 
     def manhattan_pac(self,m,g):
         return cityblock([m.x_pos,m.y_pos],[g.x_pos,g.y_pos])
@@ -147,7 +154,3 @@ class GhostController(Controller):
                 return self.manhattan_fruit(m,world)
             case 'rand':
                 return np.random.normal(0,np.sqrt(np.square(world.x_dim)+np.square(world.y_dim))+1)
-            
-    def set_ego(self,ego):
-        self._ego = ego
-        
