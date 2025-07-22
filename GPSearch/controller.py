@@ -27,8 +27,8 @@ class Controller:
                 case '+':
                     return np.sum(inputs)
                 case '-':
-                    a = inputs[0]
-                    for b in inputs[1:]:
+                    a = 0
+                    for b in inputs:
                         a = a - b
                     return a
                 case '*':
@@ -39,7 +39,7 @@ class Controller:
                         if b != 0:
                             a = a / b
                         else:
-                            #Return a number higher than the maximum distance of the worold
+                            #Return a number higher than the maximum distance of the world
                             return np.sqrt(np.square(world.x_dim)+np.square(world.y_dim))+1
                     return a
                 case 'r':
@@ -71,7 +71,6 @@ class Controller:
         if world.fruit:
             coords = world.fruit
             return cityblock([player.x_pos,player.y_pos],coords)
-
         else:
             return world.x_dim * world.y_dim
 
@@ -125,20 +124,14 @@ class GhostController(Controller):
     
     def manhattan_ghost(self,g):
         distances = []
-        for ghost in range(len(g)):
-            if g[ghost].symbol == self._ego:
-                ego = g[ghost]
+        for ghost in g:
+            if ghost.symbol == self._ego:
+                ego = ghost
         for ghost in g:
             if ghost.symbol != self._ego:
                 distances.append(cityblock([ego.x_pos,ego.y_pos],[ghost.x_pos,ghost.y_pos]))
-        try:
-            return np.min(distances)
-        except:
-            print('EXCEPTION!!!')
-            print('Length of G: ' + str(len(g)))
-            for ghost in g:
-                print('Ghost: ' + str(ghost.symbol))
-            print('Ego: ' + str(self._ego))
+        return np.min(distances)
+
     
     def check_operator(self,node,m,g,world):
         match node.operator:

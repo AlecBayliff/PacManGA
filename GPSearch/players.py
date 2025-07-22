@@ -39,6 +39,18 @@ class Player:
     def allscores(self):
         return self._allscores
     
+    @allscores.setter
+    def allscores(self,val):
+        self._allscores = val
+        
+    @property
+    def identifier(self):
+        return self._id
+    
+    @identifier.setter
+    def identifier(self,val):
+        self._id = val
+        
     def valid_roll(self,even,pos):
         if even ==True and pos == True:
             if self._xpos == self._world.x_dim-1:
@@ -78,7 +90,8 @@ class Player:
         self._allscores = []
     
 class PacMan(Player):
-    def __init__(self,mdepth,size,prob):
+    def __init__(self,idno,mdepth,size,prob):
+        self._id = idno
         self._symbol = 'm'
         self._xpos = 0
         self._ypos = 0
@@ -148,7 +161,8 @@ class PacMan(Player):
         self._score = 0
         
 class Ghost(Player):
-    def __init__(self,mdepth,size,prob,sym,xdim,ydim):
+    def __init__(self,idno,mdepth,size,prob,sym,xdim,ydim):
+        self._id = idno
         self._symbol = sym
         self._xpos = xdim-1
         self._ypos = ydim-1

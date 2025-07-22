@@ -57,7 +57,6 @@ class Game:
             for g in range(len(ghosts)):
                 ghosts[g].move(ghost_controllers[g].evaluate(pac,ghosts,play_world))
                 f.write(str(ghosts[g].symbol) + ' ' + str(ghosts[g].x_pos) + ' ' + str(ghosts[g].y_pos)+'\n')
-                    
                 if pac.x_pos == ghosts[g].x_pos and pac.y_pos == ghosts[g].y_pos:
                     score = (np.log(self._time_mult) - np.log(t))
                     ghosts[g].score = score
@@ -69,6 +68,7 @@ class Game:
                 for g in ghosts:
                     g.update_score(np.log(self._time_mult) - np.log(t))
                     g.final_score()
-                pac.final_score()
                 break;
         f.close()
+        if play_world.pills:
+            pac.final_score()

@@ -69,8 +69,6 @@ def translocation(tree):
     tree.reset_order()
     tree.update_order(root)
     return tree
-    
-
         
 def point_mutation(tree):
     copytree = copy.deepcopy(tree)

@@ -107,7 +107,6 @@ class Tree:
         #If root is the node we're looking for, return it
         if node.order == num:
             return node
-        
         #Otherwise, proceed to search for the node
         children = node.children
         if children:
