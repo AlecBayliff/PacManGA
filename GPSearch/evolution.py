@@ -7,6 +7,7 @@ Created on Tue Jul 15 02:26:43 2025
 from worldgen import World
 from players import PacMan, Ghost
 from play import Game
+import multiprocessing as mp
 import matplotlib.pyplot as plt
 import selection
 import numpy as np
@@ -36,36 +37,60 @@ def generate_ghosts(popsize,mdepth,treesize,prob,xdim,ydim):
         
 def initialize(popsize,mdepth,treesize,prob,nworlds,xdim,ydim,walld,ppill,rng_init=False):
     if isinstance(rng_init,int):
-        np.random.seed(rng_init)
+        np.random.default_rng(seed=rng_init)
     worlds = generate_worlds(nworlds, xdim, ydim, walld, ppill)
     pacmen = generate_pacmen(popsize,mdepth,treesize,prob)
     ghosts = generate_ghosts(popsize,mdepth,treesize,prob,xdim,ydim)
     return worlds,pacmen,ghosts
 
-def play_game(game,pacman,ghosts,world):
-    game.play(pacman,ghosts,world)
-    pacman.update_allscores(pacman.score)
-    for g in ghosts:
-        g.update_allscores(g.score)
-    world.reset_pills()
+'''
+This function looks a bit weird, but multiprocessing creates unique copies of variables passed in.
+Ghosts, gplayers, and ghostdict all contain references to the same objects. Updating gplayers
+will update the same ghost in ghosts and ghostdict. They do need to be returned out of the pool
+in order to update the original copies of them, though. game.play runs faster than overhead from mp.
+'''
+def run_world(popsize,fspawn,t,pacmen,ghosts,nghosts,ghostdict,world,wcount,epoch):
+    pacscores = []
+    sumlen = 0
+    k = 0
+    for p in range(popsize):
+        gplayers = random.sample(ghosts,nghosts)
+        for i in range(nghosts):
+            gplayers[i].symbol = i + 1
+        fname = 'worldfiles/epoch'+str(epoch)+'/player'+str(pacmen[p].identifier)+'/world'+str(wcount)+'.txt'
+        os.makedirs(os.path.dirname(fname), exist_ok=True)
+        game = Game(fspawn,t,fname) 
+        game.play(pacmen[p],gplayers,world)
+        world.reset_pills()
+        pacscores.append(pacmen[p].score)
+        for g in gplayers:
+            k+=1
+            g.update_allscores(g.score)
+    for g,v in ghostdict.items():
+        sumlen += len(ghostdict[g].allscores)
+    return pacscores,ghostdict
 
-def run_epoch(epoch,worlds,popsize,pacmen,ghosts,nghosts,fspawn,time):
+def run_epoch(epoch,worlds,popsize,pacmen,ghosts,nghosts,fspawn,t):
     wcount = 0
+    ghostdict = {}
+    wait = []
+    pool = mp.Pool()
     #Reset the scores before running the epoch
     for i in range(popsize):
         pacmen[i].allscores = []
         ghosts[i].allscores = []
+        ghostdict[ghosts[i].identifier] = ghosts[i]
     for w in worlds:
         wcount += 1
+        wait.append(pool.apply_async(run_world,args=[popsize,fspawn,t,pacmen,ghosts,nghosts,ghostdict,w,wcount,epoch]))
+    for w in wait:
+        pacresults,ghostresults = w.get()
         for p in range(popsize):
-            gplayers = random.sample(ghosts,nghosts)
-            for i in range(nghosts):
-                gplayers[i].symbol = i + 1
-                gplayers[i].allscores = []
-            fname = 'worldfiles/epoch'+str(epoch)+'/player'+str(pacmen[p].identifier)+'/world'+str(wcount)+'.txt'
-            os.makedirs(os.path.dirname(fname), exist_ok=True)
-            game = Game(fspawn,time,fname) 
-            play_game(game,pacmen[p],gplayers,w)
+            pacmen[p].update_allscores(pacresults[p])
+        for g,v in ghostresults.items():
+            ghostdict[g].update_allscores(v.allscores)
+    pool.close()
+    pool.join()
 
 def generate_children(players,popsize,parents,idno):
     i = 0
@@ -131,10 +156,6 @@ def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,
                 ghosts = selection.ktournament(ghosts,parents,parents)
             else:
                 ghosts = selection.fitpropsel(ghosts,parents)
-            for p in pacmen:
-                p.allscores = []
-            for g in ghosts:
-                g.allscores = []
             ghostid = generate_children(ghosts,popsize,parents,ghostid)
     plt.violinplot(bestruns)
     plt.boxplot(bestruns)

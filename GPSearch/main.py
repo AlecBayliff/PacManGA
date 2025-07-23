@@ -1,9 +1,10 @@
 #Alec Bayliff
 import evolution
+import time
 #Number of worlds
-nworlds = 5
+nworlds = 30
 #Population size
-popsize = 10
+popsize = 30
 #Max initial tree depth
 mdepth = 3
 #Number of leaves allowed
@@ -27,12 +28,14 @@ fprob = .1
 #Game time limit
 gtime = 1000
 #Cull limit
-clim = 5
+clim = 20
 #Parents
-parents = 4
-epochs = 10
+parents = 10
+epochs = 100
 selection = 'fitprop'
 evghosts = True
 
 if __name__ == '__main__':
+    start_time = time.time()
     evolution.run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,clim,parents,epochs,selection,evghosts)
+    print("--- %s seconds ---" % (time.time() - start_time))

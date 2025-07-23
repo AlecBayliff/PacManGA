@@ -84,7 +84,10 @@ class Player:
         self._world = world
         
     def update_allscores(self,score):
-        self._allscores.append(score)
+        if isinstance(score,list):
+            self._allscores.extend(score)
+        else:
+            self._allscores.append(score)
         
     def reset_scores(self):
         self._allscores = []
