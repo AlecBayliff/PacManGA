@@ -33,7 +33,7 @@ clim = 20
 parents = 10
 epochs = 100
 selection = 'fitprop'
-evghosts = True
+evghosts = False
 
 if __name__ == '__main__':
     start_time = time.time()
