@@ -63,7 +63,15 @@ class Controller:
     @tree.setter
     def tree(self,tree):
         self._tree = tree
+        
+    @property
+    def size(self):
+        return self._size
     
+    @size.setter
+    def size(self,val):
+        self._size = val
+        
     def manhattan_pill(self,m,world):
         return sp.spatial.distance.cdist([[m.x_pos,m.y_pos]],world.pills,'cityblock').min()
     
@@ -77,14 +85,11 @@ class Controller:
     def walls(self,m,world):
         return world.count_walls(m.x_pos,m.y_pos)
     
-    def size(self):
-        return self._size
-    
 class PacController(Controller):
     def __init__(self,mdepth,size,prob):
         self._tree = PacTree(mdepth,size,prob)
         self._controller = self._tree.root
-        self._size = self._tree.terminals[-1]
+        self._size = self._tree.terminals[-1]+1
                 
     def manhattan_ghost(self,m,g):
         distances = []
@@ -109,7 +114,7 @@ class GhostController(Controller):
     def __init__(self,mdepth,size,prob,ego):
         self._tree = GhostTree(mdepth,size,prob)
         self._controller = self._tree.root
-        self._size = self._tree.terminals[-1]
+        self._size = self._tree.terminals[-1]+1
         self._ego = ego
         
     @property
