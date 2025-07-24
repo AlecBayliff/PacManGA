@@ -78,7 +78,7 @@ class Player:
         self._score = self._score + score
         
     def final_score(self):
-        self._score = self._score / np.log10(self._controller.size())
+        self._score = self._score / np.log(self._controller.size())
         
     def load_world(self,world):
         self._world = world
@@ -156,7 +156,7 @@ class PacMan(Player):
     def win_score(self,t,tmult):
         #PacMan win score = (total score * 2-(time/total time)) / parsimony pressure (ln controller size)
         self._score = self._score * (2-(t/tmult))
-        self._score = self._score / np.log10(self._controller.size())
+        self._score = self._score / np.log(self._controller.size())
         
     def reset(self):
         self._xpos = 0

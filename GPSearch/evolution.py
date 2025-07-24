@@ -10,6 +10,7 @@ from play import Game
 import multiprocessing as mp
 import matplotlib.pyplot as plt
 import selection
+import shutil
 import numpy as np
 import mutators
 import random
@@ -133,6 +134,8 @@ def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,
     for i in range(epochs):
         run = []
         print('Epoch: ' + str(i+1))
+        if os.path.exists('worldfiles/epoch'+str(i)+'/') and os.path.isdir('worldfiles/epoch'+str(i)+'/'):
+            shutil.rmtree('worldfiles/epoch'+str(i)+'/')
         run_epoch(i,worlds,popsize, pacmen, ghosts,nghosts,fprob,gtime)
         bestp = 0
         bestscore = 0
