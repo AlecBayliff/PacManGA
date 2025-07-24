@@ -128,8 +128,10 @@ def generate_children(players,popsize,parents,idno):
 def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,clim,parents,epochs,sel,evghosts):
     worlds,pacmen,ghosts = initialize(popsize,mdepth,lsize,tprob,nworlds,xdim,ydim,wden,ppill)
     bestruns = []
+    allruns = []
     pacid= ghostid = popsize
     for i in range(epochs):
+        run = []
         print('Epoch: ' + str(i+1))
         run_epoch(i,worlds,popsize, pacmen, ghosts,nghosts,fprob,gtime)
         bestp = 0
@@ -138,10 +140,12 @@ def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,
         pacmen = selection.truncsel(pacmen, clim)
         for p in pacmen:
             avgscore = np.mean(p.allscores)
+            run.append(avgscore)
             if avgscore > bestscore:
                 bestscore = avgscore
                 best = p.allscores
                 bestp = p.identifier
+        allruns.append(run)
         print('Best Score: ' + str(avgscore))
         print('At: ' + str(bestp))
         bestruns.append(best)
@@ -157,6 +161,14 @@ def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,
             else:
                 ghosts = selection.fitpropsel(ghosts,parents)
             ghostid = generate_children(ghosts,popsize,parents,ghostid)
+    fig = plt.figure()
     plt.violinplot(bestruns)
     plt.boxplot(bestruns)
+    fig.suptitle('Best Runs from Each Epoch')
+    plt.show()
+    plt.clf()
+    fig = plt.figure()
+    plt.violinplot(allruns)
+    plt.boxplot(allruns)
+    fig.suptitle('Mean Scores from Each Epoch')
     plt.show()

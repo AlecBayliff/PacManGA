@@ -51,6 +51,7 @@ class Game:
             pac.move(pac_controller.evaluate(pac, ghosts, play_world))
             f.write(pac.symbol + ' ' + str(pac.x_pos) + ' ' + str(pac.y_pos)+'\n')
             if not play_world.pills:
+                print('PacMan wins!')
                 pac.win_score(t,self._time_mult)
                 break;
             

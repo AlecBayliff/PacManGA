@@ -8,7 +8,7 @@ popsize = 30
 #Max initial tree depth
 mdepth = 3
 #Number of leaves allowed
-lsize = 3
+lsize = 2
 #Tree generation probability
 tprob = .1
 #World x Dimension
@@ -31,7 +31,7 @@ gtime = 1000
 clim = 20
 #Parents
 parents = 10
-epochs = 100
+epochs = 25
 selection = 'fitprop'
 evghosts = False
 
