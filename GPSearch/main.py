@@ -4,13 +4,13 @@ import time
 #Number of worlds
 nworlds = 30
 #Population size
-popsize = 30
+popsize = 50
 #Max initial tree depth
-mdepth = 3
-#Number of leaves allowed
-lsize = 2
+mdepth = 5
+#Number of branches
+bsize = 2
 #Tree generation probability
-tprob = .1
+tprob = .05
 #World x Dimension
 xdim = 15
 #World y Dimension
@@ -27,15 +27,15 @@ nghosts = 3
 fprob = .1
 #Game time limit
 gtime = 1000
-#Cull limit
-clim = 20
-#Parents
-parents = 10
-epochs = 25
+#Survivor limit
+survivors = 15
+#K for k tournament
+k = 5
+epochs = 100
 selection = 'fitprop'
-evghosts = False
+evghosts = True
 
 if __name__ == '__main__':
     start_time = time.time()
-    evolution.run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,clim,parents,epochs,selection,evghosts)
+    evolution.run(nworlds,popsize,mdepth,bsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,survivors,k,epochs,selection,evghosts)
     print("--- %s seconds ---" % (time.time() - start_time))

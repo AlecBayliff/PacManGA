@@ -93,14 +93,20 @@ def run_epoch(epoch,worlds,popsize,pacmen,ghosts,nghosts,fspawn,t):
     pool.close()
     pool.join()
 
-def generate_children(players,popsize,parents,idno,mdepth,lsize,tprob):
+def generate_children(select,players,popsize,survivors,k,idno,mdepth,lsize,tprob,xdim=0,ydim=0):
     i = 0
-    while i < (popsize-parents):
-        select = np.random.randint(0,5)
+    newplayers = []
+    while i < (popsize-survivors):
+        choice = np.random.randint(0,5)
         #Crossover
-        if select < 2 and i < (popsize-parents)-1:
+        if choice < 2 and i < (popsize-survivors)-1:
             i+=1
-            p1,p2 = random.choices(players,k=2)
+            if select == 'ktournament':
+                p1,p2 = selection.ktournament(players, 2, k,replacement=True)
+            elif select == 'fitprop':
+                p1,p2 = selection.fitpropsel(players, 2)
+            else:
+                raise(print('Incorrect selection method!'))
             p1 = copy.deepcopy(p1)
             p2 = copy.deepcopy(p2)
             o1,o2 = mutators.crossover(p1.controller.tree, p2.controller.tree)
@@ -114,11 +120,17 @@ def generate_children(players,popsize,parents,idno,mdepth,lsize,tprob):
             p1.size = p1.controller.tree.terminals[-1]+1
             p2.identifier = idno + 2
             p2.size = p2.controller.tree.terminals[-1]+1
-            players.append(p1)
-            players.append(p2)
+            newplayers.append(p1)
+            newplayers.append(p2)
             idno += 2
         #Point Mutations
-        elif select < 4:
+        elif choice < 4:
+            if select == 'ktournament':
+                p1 = selection.ktournament(players, 1, k,replacement=True)
+            elif select == 'fitprop':
+                p1 = selection.fitpropsel(players, 1)
+            else:
+                raise(print('Incorrect selection method!'))
             p1 = copy.deepcopy(random.choice(players))
             p1.controller.tree = mutators.point_mutation(p1.controller.tree)
             p1.controller.tree.reset_order()
@@ -126,19 +138,20 @@ def generate_children(players,popsize,parents,idno,mdepth,lsize,tprob):
             idno += 1
             p1.identifier = idno
             p1.size = p1.controller.tree.terminals[-1]+1
-            players.append(p1)
+            newplayers.append(p1)
         else:
             #A mircale! A genetically distinct individual is born!
             if players[0].symbol == 'm':
                 idno += 1
-                players.append(PacMan(idno,mdepth,lsize,tprob))
+                newplayers.append(PacMan(idno,mdepth,lsize,tprob))
             else:
                 idno += 1
-                players.append(Ghost(idno,mdepth,lsize,tprob))
+                newplayers.append(Ghost(idno,mdepth,lsize,tprob,0,xdim,ydim))
         i+=1
+    players.extend(newplayers)
     return idno
         
-def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,clim,parents,epochs,sel,evghosts):
+def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,fprob,gtime,survivors,k,epochs,sel,evghosts):
     worlds,pacmen,ghosts = initialize(popsize,mdepth,lsize,tprob,nworlds,xdim,ydim,wden,ppill)
     bestruns = []
     allruns = []
@@ -152,7 +165,7 @@ def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,
         bestp = 0
         bestscore = 0
         best = ''
-        pacmen = selection.truncsel(pacmen, clim)
+        pacmen = selection.truncsel(pacmen, survivors)
         for p in pacmen:
             avgscore = np.mean(p.allscores)
             run.append(avgscore)
@@ -162,22 +175,14 @@ def run(nworlds,popsize,mdepth,lsize,tprob,xdim,ydim,wden,ppill,rnginit,nghosts,
                 bestp = p.identifier
                 bestworld = p.allscores.index(max(p.allscores))
         allruns.append(run)
-        print('Best Score: ' + str(avgscore))
-        print('At: ' + str(bestp))
+        print('Best Average Score: ' + str(avgscore))
+        print('Player: ' + str(bestp))
         print('Best World: ' + str(bestworld+1))
         bestruns.append(best)
-        if sel == 'ktournament':
-            pacmen = selection.ktournament(pacmen,parents,parents)
-        else:
-            pacmen = selection.fitpropsel(pacmen,parents)
-        pacid = generate_children(pacmen, popsize, parents,pacid,mdepth,lsize,tprob)
+        pacid = generate_children(sel,pacmen,popsize,survivors,k,pacid,mdepth,lsize,tprob)
         if evghosts:
-            ghosts = selection.truncsel(ghosts,clim)
-            if sel == 'ktournament':
-                ghosts = selection.ktournament(ghosts,parents,parents)
-            else:
-                ghosts = selection.fitpropsel(ghosts,parents)
-            ghostid = generate_children(ghosts,popsize,parents,ghostid,mdepth,lsize,tprob)
+            ghosts = selection.truncsel(ghosts,survivors)
+            ghostid = generate_children(sel,ghosts,popsize,survivors,k,ghostid,mdepth,lsize,tprob,xdim,ydim)
     fig = plt.figure()
     plt.violinplot(bestruns)
     plt.boxplot(bestruns)

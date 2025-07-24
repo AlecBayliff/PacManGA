@@ -11,9 +11,9 @@ import numpy as np
 #Might add reward-based selection. Players can be updated with Player.update_score()
 #But keeping track of children and grandchildren would require some changes.
 
-def ktournament(players,k,parents,replacement=False):
+def ktournament(players,winners,k,replacement=False):
     results = []
-    for i in range(parents):
+    for i in range(winners):
         if replacement == False:
             tournament = random.sample(players,k)
         else:
@@ -28,13 +28,13 @@ def ktournament(players,k,parents,replacement=False):
         results.append(tournament[maxpos])
     return results
 
-def fitpropsel(players,parents):
+def fitpropsel(players,k):
     scores = []
     for p in players:
         scores.append(np.mean(p.allscores))
     sumscores = np.sum(scores)
     scores[:] = [x / sumscores for x in scores]
-    return list(np.random.choice(players,p=scores,size=parents,replace=False))
+    return list(np.random.choice(players,p=scores,size=k,replace=False))
 
 def truncsel(players,n):
     scores = []

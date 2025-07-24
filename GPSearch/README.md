@@ -6,18 +6,18 @@ Currently, running main.py in the console will work. Eventually, I'll get around
 
 # Parameters
 - mdepth - Maximum depth for controller tree
-- lsize - Number of leaves allowed in the tree.
+- bsize - Number of branches
 - tprob - Tree structural variation probability
 - xdim - World x-dimension
 - ydim - World y-dimension
 - wden - Wall density
 - ppill - Pill density
 - rnginit - Seed
-- nghosts - Number of ghosts (GPac visualizer requires 3. nghosts should always be less than )
+- nghosts - Number of ghosts (GPac visualizer requires 3. nghosts should always be less than popsize)
 - fprob - Fruit generation probability for each step.
 - gtime - Game time limit
-- clim - Cull limit (Number to keep for truncation selection, <= popsize)
-- parents - Number of parents to keep for each epoch. Must be <= clim. If parents == popsize, no children are created.
+- survivors - Number of survivors for each generation
+- k - Tournament size for ktournament
 - epochs - Number of epochs to run
 - selection - Determines which selection to use. Currently, only fitness proportional (fitprop) and k-tournament (ktournament) are implemented.
 - evghosts - If true, runs a competitive, co-evolutionary algorithm. If false, ghosts do not evolve over time.
@@ -34,4 +34,4 @@ The mean of each epoch, displaying convergence.
 The scores from the best PacMan of each epoch do not converge in 25 epochs.
 
 # What's next?
-Cleaning up code, adding more selection criteria, adding operators, and adding a wider variety of tree mutations!
+Cleaning up code, converting parsimony pressure to a pareto optimal solution, adding more selection criteria, adding operators, and adding a wider variety of tree mutations!
