@@ -26,8 +26,11 @@ Currently, running main.py in the console will work. Eventually, I'll get around
 Currently, it initializes a population (popsize) and a number of randomly generated worlds (nworlds). For each epoch, it will run the current population of PacMen against a number of randomly selected Ghosts. After running each epoch, it will cull the worst performing members and then randomly generate children from parents selected through the selection criteria. Evolution will continue until the specified number of epochs are reached.
 
 ![meanruns](meanruns.png)
+
 The mean of each epoch, displaying convergence.
+
 ![bestruns](bestruns.png)
+
 The scores from the best PacMan of each epoch do not converge in 25 epochs.
 
 # What's next?
